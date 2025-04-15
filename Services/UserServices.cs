@@ -57,6 +57,7 @@ public class UserServices : IUserServices
             DOB = u.DOB,
             Address = u.Address,
             Phone = u.Phone,
+            UserStatus = u.UserStatus,
             Role = u.Role,
             CreatedAt = u.CreatedAt
         }).FirstOrDefaultAsync();
