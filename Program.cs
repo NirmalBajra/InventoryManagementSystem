@@ -1,14 +1,30 @@
 using InventoryManagementSystem.Data;
+using InventoryManagementSystem.Services;
+using InventoryManagementSystem.Services.Interfaces;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddScoped<IUserServices, UserServices> ();
 
 builder.Services.AddDbContext<FirstRunDbContext>(builder => {
     builder.UseNpgsql("Host=localhost; DataBase=InventorySystemDB; Username=postgres; Password=admin;");
 });
+
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/api/auth/login";
+        options.LogoutPath = "/api/auth/logout";
+        options.AccessDeniedPath = "api/auth/forbidden";
+        options.ExpireTimeSpan = TimeSpan.FromDays(1);
+        options.SlidingExpiration = true;
+    });
+    builder.Services.AddHttpContextAccessor();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

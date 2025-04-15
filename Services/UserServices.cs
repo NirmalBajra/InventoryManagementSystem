@@ -1,9 +1,14 @@
 using System;
+using System.Security.Claims;
 using System.Transactions;
 using InventoryManagementSystem.Data;
+using InventoryManagementSystem.Dto;
 using InventoryManagementSystem.Helpers;
 using InventoryManagementSystem.Services.Interfaces;
 using InventoryManagementSystem.ViewModels;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace InventoryManagementSystem.Services;
@@ -11,8 +16,10 @@ namespace InventoryManagementSystem.Services;
 public class UserServices : IUserServices
 {
     private readonly FirstRunDbContext dbContext;
-    public UserServices(FirstRunDbContext dbContext){
+    private readonly IHttpContextAccessor _httpContextAccessor;
+    public UserServices(FirstRunDbContext dbContext,IHttpContextAccessor httpContextAccessor){
         this.dbContext = dbContext;
+        _httpContextAccessor = httpContextAccessor;
     }
     //Create new User
     public async Task CreateUser(UserVm vm)
@@ -57,5 +64,32 @@ public class UserServices : IUserServices
             throw new UserNotFoundException("User not Found.");
         }
         return user;
+    }
+    public async Task Login(LoginUserDto dto){
+        using var txn = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+        var user = await dbContext.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);
+        if(user == null){
+            throw new UserNotFoundException("Invalid Email.");
+        }
+        bool verified = BCrypt.Net.BCrypt.Verify(dto.Password,user.Password);
+        if(!verified){
+            throw new Exception("Invalid Password");
+        }
+
+        var httpContext = _httpContextAccessor.HttpContext;
+        var claims = new List<Claim>
+        {
+            new("Id",user.UserId.ToString()),
+            new("Username",user.UserName),
+            new("Role",user.Role)
+        };
+        var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+        await httpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
+        txn.Complete();
+    }
+
+    //Logout 
+    public async Task Logout(){
+        await _httpContextAccessor.HttpContext.SignOutAsync();
     }
 }
