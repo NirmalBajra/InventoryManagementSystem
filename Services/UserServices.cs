@@ -35,7 +35,7 @@ public class UserServices : IUserServices
         var hashPassword = BCrypt.Net.BCrypt.HashPassword(vm.Password);
         var user = new Entity.User();
         user.UserName = vm.UserName;
-        user.DOB = vm.DOB;
+        user.DOB = DateTime.SpecifyKind(vm.DOB, DateTimeKind.Utc);
         user.Email = vm.Email;
         user.Address = vm.Address;
         user.Phone = vm.Phone;
@@ -80,9 +80,9 @@ public class UserServices : IUserServices
         var httpContext = _httpContextAccessor.HttpContext;
         var claims = new List<Claim>
         {
-            new("Id",user.UserId.ToString()),
-            new("Username",user.UserName),
-            new("Role",user.Role)
+            new Claim("Id",user.UserId.ToString()),
+            new Claim("Username",user.UserName),
+            new Claim(ClaimTypes.Role, user.Role)
         };
         var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
         await httpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));

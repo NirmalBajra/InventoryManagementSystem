@@ -8,22 +8,33 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-builder.Services.AddScoped<IUserServices, UserServices> ();
+builder.Services.AddScoped<IUserServices, UserServices>();
 
-builder.Services.AddDbContext<FirstRunDbContext>(builder => {
+builder.Services.AddDbContext<FirstRunDbContext>(builder =>
+{
     builder.UseNpgsql("Host=localhost; DataBase=InventorySystemDB; Username=postgres; Password=admin;");
 });
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
-        options.LoginPath = "/api/auth/login";
-        options.LogoutPath = "/api/auth/logout";
-        options.AccessDeniedPath = "api/auth/forbidden";
+        options.LoginPath = "/Auth/login";
+        options.LogoutPath = "/Auth/logout";
+        options.AccessDeniedPath = "/Auth/forbidden";
         options.ExpireTimeSpan = TimeSpan.FromDays(1);
         options.SlidingExpiration = true;
     });
-    builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("RequireAdminRole",
+         policy => policy.RequireRole("Administrator"));
+    options.AddPolicy("RequireUserRole",
+         policy => policy.RequireRole("Normal"));
+});
+
+
+builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
 
