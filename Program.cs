@@ -9,6 +9,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<IUserServices, UserServices>();
+builder.Services.AddScoped<IProductCategoryServices, ProductCategoryServices>();
+builder.Services.AddKeyedScoped<IProductServices, ProductServices>();
 
 builder.Services.AddDbContext<FirstRunDbContext>(builder =>
 {
