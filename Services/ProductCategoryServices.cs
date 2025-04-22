@@ -2,6 +2,7 @@ using System;
 using System.Transactions;
 using InventoryManagementSystem.Data;
 using InventoryManagementSystem.Entity;
+using InventoryManagementSystem.Helpers;
 using InventoryManagementSystem.Services.Interfaces;
 using InventoryManagementSystem.ViewModels.ProductCategory;
 using Microsoft.EntityFrameworkCore;
@@ -93,7 +94,7 @@ public class ProductCategoryServices : IProductCategoryServices
     //View ProductCategoryByName
     public async Task<ProductCategoryVM> GetProductCategoryByName(string name)
     {
-        return await dbContext.ProductCategories
+        var result = await dbContext.ProductCategories
             .Where(c => c.CategoryName == name)
             .Select(c => new ProductCategoryVM
             {
@@ -103,5 +104,11 @@ public class ProductCategoryServices : IProductCategoryServices
                 IsActive = c.IsActive,
                 CreatedAt = c.CreatedAt
             }).FirstOrDefaultAsync();
+        
+        if(result == null )
+        {
+            throw new UserNotFoundException($"Product Category not found.");
+        }
+        return result;
     }
 }

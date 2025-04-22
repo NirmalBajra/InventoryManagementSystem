@@ -8,4 +8,5 @@ public class ProductVm
     public string ProductName { get; set; }
     public string Description { get; set; }
     public string CategoryName { get; set; }
+    public string ImagePath { get; set; } 
 }

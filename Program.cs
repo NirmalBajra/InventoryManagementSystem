@@ -10,7 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<IUserServices, UserServices>();
 builder.Services.AddScoped<IProductCategoryServices, ProductCategoryServices>();
-builder.Services.AddKeyedScoped<IProductServices, ProductServices>();
+builder.Services.AddScoped<IProductServices, ProductServices>();
 
 builder.Services.AddDbContext<FirstRunDbContext>(builder =>
 {

@@ -11,7 +11,8 @@ namespace InventoryManagementSystem.Services;
 public class ProductServices : IProductServices
 {
     private readonly FirstRunDbContext dbContext;
-    public ProductServices(FirstRunDbContext dbContext){
+    public ProductServices(FirstRunDbContext dbContext)
+    {
         this.dbContext = dbContext;
     }
 
@@ -19,12 +20,30 @@ public class ProductServices : IProductServices
     public async Task AddProduct(ProductCreateVm vm)
     {
         using var tnx = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+
+        string? imagePath = null;
+
+        if (vm.ImageFile != null && vm.ImageFile.Length > 0)
+        {
+            var fileName = Guid.NewGuid().ToString() + Path.GetExtension(vm.ImageFile.FileName);
+            var directoryPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images");
+            Directory.CreateDirectory(directoryPath);
+
+            var filePath = Path.Combine(directoryPath, fileName);
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await vm.ImageFile.CopyToAsync(stream);
+            }
+            imagePath = "images/" + fileName;
+        }
         var product = new Product
         {
             ProductName = vm.ProductName,
             Description = vm.Description,
-            CategoryId = vm.CategoryId
+            CategoryId = vm.CategoryId,
+            ImagePath = imagePath
         };
+
         dbContext.Add(product);
         await dbContext.SaveChangesAsync();
         tnx.Complete();
@@ -35,21 +54,30 @@ public class ProductServices : IProductServices
     {
         return await dbContext.Products
             .Include(p => p.Category)
-            .Select(p => new ProductVm{
+            .Select(p => new ProductVm
+            {
                 ProductId = p.ProductId,
                 ProductName = p.ProductName,
                 Description = p.Description,
-                CategoryName = p.Category.CategoryName
+                CategoryName = p.Category.CategoryName,
+                ImagePath = string.IsNullOrEmpty(p.ImagePath) ? "images/default.png": p.ImagePath
             }).ToListAsync();
     }
 
     //Get Product By name
-    public async Task<List<Product>> GetProductByName(string name)
+    public async Task<List<ProductVm>> GetProductByName(string name)
     {
         return await dbContext.Products
-            .Where(p => p.ProductName.Contains(name))
-            .Include(p => p.Category)
-            .ToListAsync();
+        .Include(p => p.Category)
+        .Select(p => new ProductVm
+        {
+            ProductId = p.ProductId,
+            ProductName = p.ProductName,
+            Description = p.Description,
+            CategoryName = p.Category.CategoryName,   // Mapping from Product to ProductVm
+            ImagePath = string.IsNullOrEmpty(p.ImagePath) ? "images/default.png" : p.ImagePath  // Default image if no image is provided
+        })
+        .ToListAsync();
     }
 
     //Update Product
@@ -57,12 +85,25 @@ public class ProductServices : IProductServices
     {
         using var tnx = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
         var product = await dbContext.Products.FindAsync(vm.ProductId);
-        if(product != null)
+        if (product != null)
         {
             product.ProductName = vm.ProductName;
             product.Description = vm.Description;
             product.CategoryId = vm.CategoryId;
 
+            if (vm.ImageFile != null && vm.ImageFile.Length > 0)
+            {
+                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(vm.ImageFile.FileName);
+                var directoryPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images");
+                Directory.CreateDirectory(directoryPath);
+
+                var filePath = Path.Combine(directoryPath, fileName);
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await vm.ImageFile.CopyToAsync(stream);
+                }
+                product.ImagePath = "images/" + fileName;
+            }
             await dbContext.SaveChangesAsync();
         }
         tnx.Complete();
@@ -73,8 +114,17 @@ public class ProductServices : IProductServices
     {
         using var tnx = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
         var product = await dbContext.Products.FindAsync(id);
-        if(product != null)
+        if (product != null)
         {
+            //remove the image from local file
+            if (!string.IsNullOrEmpty(product.ImagePath))
+            {
+                var fullImagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", product.ImagePath);
+                if (File.Exists(fullImagePath))
+                {
+                    File.Delete(fullImagePath);
+                }
+            }
             dbContext.Products.Remove(product);
             await dbContext.SaveChangesAsync();
         }
@@ -86,8 +136,20 @@ public class ProductServices : IProductServices
     {
         using var tnx = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
         var product = await dbContext.Products.Where(p => productIds.Contains(p.ProductId)).ToListAsync();
-        if(product.Any())
+        if (product.Any())
         {
+            //delete the images from the local file
+            foreach (var prod in product)
+            {
+                if (!string.IsNullOrEmpty(prod.ImagePath))
+                {
+                    var fullImagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", prod.ImagePath);
+                    if (File.Exists(fullImagePath))
+                    {
+                        File.Delete(fullImagePath);
+                    }
+                }
+            }
             dbContext.Products.RemoveRange(product);
             await dbContext.SaveChangesAsync();
         }

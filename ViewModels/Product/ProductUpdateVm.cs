@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace InventoryManagementSystem.ViewModels.Product;
 
-public class ProductUpdate
+public class ProductUpdateVm
 {
     [Required]
     public int ProductId { get; set;}
@@ -11,4 +11,5 @@ public class ProductUpdate
     public string Description { get; set;}
     [Required]
     public int CategoryId { get; set;}
+    public IFormFile? ImageFile { get; set; }
 }
