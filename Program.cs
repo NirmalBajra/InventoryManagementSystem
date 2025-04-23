@@ -12,6 +12,7 @@ builder.Services.AddScoped<IUserServices, UserServices>();
 builder.Services.AddScoped<IProductCategoryServices, ProductCategoryServices>();
 builder.Services.AddScoped<IProductServices, ProductServices>();
 builder.Services.AddScoped<ISupplierServices, SupplierServices>();
+builder.Services.AddScoped<IPurchaseService, PurchaseServices>();
 
 builder.Services.AddDbContext<FirstRunDbContext>(builder =>
 {
