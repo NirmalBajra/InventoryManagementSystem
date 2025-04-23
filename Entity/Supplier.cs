@@ -11,6 +11,7 @@ public class Supplier
     public string Contact { get; set;}
     public string Email { get; set;}
     public string Address { get; set;}
+    public DateTime CreatedAt { get; set; } = DateTime.Now;
 
     public ICollection<Purchase> Purchases { get; set;}
 }

@@ -60,7 +60,7 @@ public class ProductServices : IProductServices
                 ProductName = p.ProductName,
                 Description = p.Description,
                 CategoryName = p.Category.CategoryName,
-                ImagePath = string.IsNullOrEmpty(p.ImagePath) ? "images/default.png": p.ImagePath
+                ImagePath = string.IsNullOrEmpty(p.ImagePath) ? "images/default.png" : p.ImagePath
             }).ToListAsync();
     }
 
