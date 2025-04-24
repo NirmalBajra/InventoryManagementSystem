@@ -11,9 +11,11 @@ namespace InventoryManagementSystem.Services;
 public class PurchaseServices : IPurchaseService
 {
     private readonly FirstRunDbContext dbContext;
-    public PurchaseServices(FirstRunDbContext dbContext)
+    private readonly StockService stockService;
+    public PurchaseServices(FirstRunDbContext dbContext,StockService stockService)
     {
         this.dbContext = dbContext;
+        this.stockService = stockService;
     }
 
     //Purchase made
@@ -36,7 +38,13 @@ public class PurchaseServices : IPurchaseService
         purchase.TotalAmount = purchase.PurchaseDetails.Sum(d => d.TotalPrice);
 
         dbContext.Purchases.Add(purchase);
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync(); //Save the Purchase
+
+        foreach(var detail in purchase.PurchaseDetails)
+        {
+            await stockService.UpdateStockOnPurchase(detail);
+        }
+
         tnx.Complete();
         return purchase.PurchaseId;
     }
@@ -92,6 +100,11 @@ public class PurchaseServices : IPurchaseService
             existingPurchase.TotalAmount = existingPurchase.PurchaseDetails.Sum(d => d.TotalPrice);
 
             await dbContext.SaveChangesAsync();
+
+            foreach(var detail in existingPurchase.PurchaseDetails)
+            {
+                await stockService.UpdateStockOnPurchase(detail);
+            }
             return true;
         }
         catch

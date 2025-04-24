@@ -1,4 +1,5 @@
 using InventoryManagementSystem.Data;
+using InventoryManagementSystem.Entity;
 using InventoryManagementSystem.Services;
 using InventoryManagementSystem.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -13,6 +14,8 @@ builder.Services.AddScoped<IProductCategoryServices, ProductCategoryServices>();
 builder.Services.AddScoped<IProductServices, ProductServices>();
 builder.Services.AddScoped<ISupplierServices, SupplierServices>();
 builder.Services.AddScoped<IPurchaseService, PurchaseServices>();
+builder.Services.AddScoped<IStockService, StockService>();
+builder.Services.AddScoped<ISalesService, SalesService>();
 
 builder.Services.AddDbContext<FirstRunDbContext>(builder =>
 {
