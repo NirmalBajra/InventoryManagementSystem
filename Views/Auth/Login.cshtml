@@ -4,85 +4,72 @@
 }
 <h1>@ViewData["Title"]</h1>
 
-<p>Login Page</p>
-
-@if (TempData["SuccessMessage"] != null)
-{
-    <div class="alert alert-success">
-        @TempData["SuccessMessage"]
-    </div>
-}
-@if (!ViewData.ModelState.IsValid && ViewData.ModelState[string.Empty] != null)
-{
-    <div class="alert alert-danger">
-        @foreach (var error in ViewData.ModelState[string.Empty].Errors)
-        {
-            <p>@error.ErrorMessage</p>
-        }
-    </div>
-}
-
 <div class="container-xxl">
-    <div class="authentication-wrapper authentication-basic container-p-y">
-        <div class="authentication-inner">
-            <!-- Register -->
-            <div class="card px-sm-6 px-0">
-                <div class="card-body">
+    <div class="authentication-wrapper authentication-basic container-p-y d-flex align-items-center justify-content-center min-vh-100">
+        <div class="authentication-inner w-100" style="max-width: 420px">
+            <div class="card shadow-lg rounded-4 border-0">
+                <div class="card-body p-5">
                     <!-- Logo -->
-                    <div class="app-brand justify-content-center">
-                        <a href="/" class="app-brand-link gap-2">
+                    <div class="app-brand justify-content-center mb-4">
+                        <a href="/" class="app-brand-link gap-2 text-decoration-none">
                             <span class="app-brand-logo demo">@await Html.PartialAsync("../_Partials/_Macros")</span>
-                            <span class="app-brand-text demo text-heading fw-bold">@TempData.Peek("appName")</span>
+                            <span class="app-brand-text demo text-primary fw-bold fs-4">@TempData.Peek("appName")</span>
                         </a>
                     </div>
-                    <!-- /Logo -->
-                    <h4 class="mb-1">Welcome to @TempData.Peek("appName")! 👋</h4>
-                    <p class="mb-6">Please sign-in to your account and start the adventure</p>
 
-                    <form asp-action="Login" asp-controller="Auth" class="mb-6">
-                        <div class="mb-6">
+                    <h4 class="mb-1 text-center">Welcome to @TempData.Peek("appName")! 👋</h4>
+                    <p class="mb-4 text-center text-muted">Sign in to continue managing inventory</p>
+
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+                    }
+                    @if (!ViewData.ModelState.IsValid && ViewData.ModelState[string.Empty] != null)
+                    {
+                        <div class="alert alert-danger">
+                            @foreach (var error in ViewData.ModelState[string.Empty].Errors)
+                            {
+                                <p class="mb-0">@error.ErrorMessage</p>
+                            }
+                        </div>
+                    }
+
+                    <form asp-action="Login" asp-controller="Auth" class="needs-validation" novalidate>
+                        <div class="mb-4">
                             <label asp-for="Email" class="form-label">Email or Username</label>
-                            <input type="text" class="form-control" asp-for="Email"
-                                placeholder="Enter your email or username" autofocus>
+                            <input asp-for="Email" type="text" class="form-control form-control-lg" placeholder="you@example.com" required />
                             <span asp-validation-for="Email" class="text-danger"></span>
                         </div>
 
-                        <div class="mb-6 form-password-toggle">
-                            <label class="form-label" for="password">Password</label>
-                            <div class="input-group input-group-merge">
-                                <input type="password" class="form-control" asp-for="Password"
-                                    placeholder="Enter Your Password" aria-describedby="password" />
-                                <span asp-validation-for="Password" class="text-danger"></span>
+                        <div class="mb-4">
+                            <label asp-for="Password" class="form-label">Password</label>
+                            <div class="input-group">
+                                <input asp-for="Password" type="password" class="form-control form-control-lg" placeholder="••••••••" required />
                             </div>
+                            <span asp-validation-for="Password" class="text-danger"></span>
                         </div>
 
-                        <div class="mb-8">
-                            <div class="d-flex justify-content-between mt-8">
-                                <div class="form-check mb-0 ms-2">
-                                    <input class="form-check-input" type="checkbox" id="remember-me">
-                                    <label class="form-check-label" for="remember-me">
-                                        Remember Me
-                                    </label>
-                                </div>
-                                <a href="/Auth/ForgotPasswordBasic">
-                                    <span>Forgot Password?</span>
-                                </a>
+                        <div class="mb-4 d-flex justify-content-between align-items-center">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="remember-me">
+                                <label class="form-check-label" for="remember-me"> Remember Me </label>
                             </div>
+                            <a href="/Auth/ForgotPasswordBasic" class="text-decoration-none">Forgot Password?</a>
                         </div>
-                        <div class="mb-6">
-                            <button class="btn btn-primary d-grid w-100" type="submit">Login</button>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">Login</button>
                         </div>
                     </form>
 
-                    <p class="text-center">
-                        <span>New on our platform?</span>
-                        <a href="/Auth/Register">
-                            <span>Create an account</span>
-                        </a>
+                    <hr class="my-4">
+
+                    <p class="text-center mb-0">
+                        New on our platform?
+                        <a href="/Auth/Register" class="fw-semibold">Create an account</a>
                     </p>
                 </div>
             </div>
-            <!-- /Register -->
         </div>
     </div>
 </div>

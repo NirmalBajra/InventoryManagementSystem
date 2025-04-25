@@ -1,89 +1,86 @@
-﻿@model InventoryManagementSystem.ViewModels.UserVm;
+﻿@model InventoryManagementSystem.ViewModels.UserVm
 @{
     ViewData["Title"] = "Register";
 }
-<h1>@ViewData["Title"]</h1>
 
-<!DOCTYPE html>
-<html lang="en">
+<div class="container-fluid px-4">
+    <h4 class="mt-4 mb-3">Create a New Account 🚀</h4>
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card">
+                <div class="card-body">
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+                    }
 
-<body>
-    <p>Login Page</p>
-    @if (TempData["SuccessMessage"] != null)
-    {
-        <div class="alert alert-success">
-            @TempData["SuccessMessage"]
-        </div>
-    }
+                    @if (!ViewData.ModelState.IsValid && ViewData.ModelState[string.Empty] != null)
+                    {
+                        <div class="alert alert-danger">
+                            @foreach (var error in ViewData.ModelState[string.Empty].Errors)
+                            {
+                                <p>@error.ErrorMessage</p>
+                            }
+                        </div>
+                    }
 
-    @if (!ViewData.ModelState.IsValid && ViewData.ModelState[string.Empty] != null)
-    {
-        <div class="alert alert-danger">
-            @foreach (var error in ViewData.ModelState[string.Empty].Errors)
-            {
-                <p>@error.ErrorMessage</p>
-            }
-        </div>
-    }
-    <div>
-        <form method="post" asp-action="Register" asp-controller="Auth" class="card">
-            <div class="card-body">
-                <div class="card-group">
-                    <label asp-for="UserName"></label>
-                    <input asp-for="UserName" class="form-control" required />
-                    <span asp-validation-for="UserName" class="text-danger"></span>
+                    <form method="post" asp-action="Register" asp-controller="Auth">
+                        <div class="mb-3">
+                            <label asp-for="UserName" class="form-label"></label>
+                            <input asp-for="UserName" class="form-control" required />
+                            <span asp-validation-for="UserName" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label"></label>
+                            <input asp-for="Email" type="email" class="form-control" required />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="DOB" class="form-label"></label>
+                            <input asp-for="DOB" type="date" class="form-control" required />
+                            <span asp-validation-for="DOB" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Address" class="form-label"></label>
+                            <input asp-for="Address" class="form-control" />
+                            <span asp-validation-for="Address" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Phone" class="form-label"></label>
+                            <input asp-for="Phone" class="form-control" />
+                            <span asp-validation-for="Phone" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Role" class="form-label"></label>
+                            <select asp-for="Role" class="form-control">
+                                <option value="">-- Select Role --</option>
+                                <option value="Administrator">Administrator</option>
+                                <option value="User">Normal User</option>
+                            </select>
+                            <span asp-validation-for="Role" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3 form-password-toggle">
+                            <label asp-for="Password" class="form-label"></label>
+                            <input asp-for="Password" type="password" class="form-control" required />
+                            <span asp-validation-for="Password" class="text-danger"></span>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">Register</button>
+                    </form>
+
+                    <p class="text-center mt-3">
+                        Already have an account?
+                        <a href="/Auth/Login">Login here</a>
+                    </p>
                 </div>
-
-                <div class="card-group">
-                    <label asp-for="Email"></label>
-                    <input asp-for="Email" type="email" class="form-control" required />
-                    <span asp-validation-for="Email" class="text-danger"></span>
-                </div>
-
-                <div class="card-group">
-                    <label asp-for="DOB"></label>
-                    <input asp-for="DOB" type="date" class="form-control" required />
-                    <span asp-validation-for="DOB" class="text-danger"></span>
-                </div>
-
-                <div class="card-group">
-                    <label asp-for="Address"></label>
-                    <input asp-for="Address" class="form-control" />
-                    <span asp-validation-for="Address" class="text-danger"></span>
-                </div>
-
-                <div class="card-group">
-                    <label asp-for="Phone"></label>
-                    <input asp-for="Phone" class="form-control" />
-                    <span asp-validation-for="Phone" class="text-danger"></span>
-                </div>
-
-                <div class="card-group">
-                    <label asp-for="Role"></label>
-                    <select asp-for="Role" class="form-control">
-                        <option value="">-- Select Role --</option>
-                        <option value="Administrator">Administrator</option>
-                        <option value="User">Normal User</option>
-                    </select>
-                    <span asp-validation-for="Role" class="text-danger"></span>
-                </div>
-
-                <div class="card-group">
-                    <label asp-for="Password"></label>
-                    <input asp-for="Password" type="password" class="form-control" required/>
-                    <span asp-validation-for="Password" class="text-danger"></span>
-                </div>
-
-                <button type="submit" class="btn btn-primary">Register</button>
             </div>
-        </form>
+        </div>
     </div>
-</body>
-
-</html>
+</div>

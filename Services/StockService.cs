@@ -90,4 +90,37 @@ public class StockService : IStockService
         await dbContext.SaveChangesAsync();
         return remaining == 0;
     }
+
+    //RestoreStock
+    public async Task RestoreStock(int productId, int quantity, string updatedBy)
+    {
+        var stocks = await dbContext.Stocks
+            .Where(s => s.ProductId == productId)
+            .OrderByDescending(s => s.CreatedAt)
+            .ToListAsync();
+
+        int remaining = quantity;
+
+        foreach (var stock in stocks)
+        {
+            if (remaining <= 0) break;
+
+            int restoreQty = Math.Min(stock.Quantity - stock.AvailableQuantity, remaining);
+            stock.AvailableQuantity += restoreQty;
+            remaining -= restoreQty;
+
+            dbContext.StockFlows.Add(new StockFlow
+            {
+                StockId = stock.StockId,
+                ProductId = stock.ProductId,
+                Quantity = restoreQty,
+                UnitPrice = stock.UnitPrice,
+                TotalCost = stock.UnitPrice * restoreQty,
+                StockType = Enums.StockType.In,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedBy = updatedBy
+            });
+        }
+        await dbContext.SaveChangesAsync();
+    }
 }

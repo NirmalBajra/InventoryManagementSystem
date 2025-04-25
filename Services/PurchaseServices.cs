@@ -11,8 +11,8 @@ namespace InventoryManagementSystem.Services;
 public class PurchaseServices : IPurchaseService
 {
     private readonly FirstRunDbContext dbContext;
-    private readonly StockService stockService;
-    public PurchaseServices(FirstRunDbContext dbContext,StockService stockService)
+    private readonly IStockService stockService;
+    public PurchaseServices(FirstRunDbContext dbContext,IStockService stockService)
     {
         this.dbContext = dbContext;
         this.stockService = stockService;
