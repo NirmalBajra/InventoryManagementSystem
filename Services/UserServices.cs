@@ -82,6 +82,7 @@ public class UserServices : IUserServices
         {
             new Claim("Id",user.UserId.ToString()),
             new Claim("Username",user.UserName),
+            new Claim("Email",user.Email),
             new Claim(ClaimTypes.Role, user.Role)
         };
         var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);

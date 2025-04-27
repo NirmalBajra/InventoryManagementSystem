@@ -1,0 +1,129 @@
+﻿@model List<ProductVm>
+@using InventoryManagementSystem.ViewModels.Product;
+@{
+    ViewData["Title"] = "ViewProducts";
+
+    // Breadcrumb values
+    ViewData["PageTitle"] = "View Products";
+    ViewData["MainItem"] = "Products";
+    ViewData["SubItem"] = "View Products";
+}
+<div class="container">
+    <div class="page-inner">
+        @await Html.PartialAsync("breadcurm")
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">Basic</h4>
+                    </div>
+                    <div class="card-body">
+                        <form id="deleteMultipleForm" method="post" asp-action="DeleteMultipleProducts">
+                            @Html.AntiForgeryToken()
+
+                            <div class="table-responsive">
+                                <table id="basic-datatables" class="display table table-striped table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th><input type="checkbox" id="selectAll" /></th>
+                                            <th>Image</th>
+                                            <th>Product Id</th>
+                                            <th>Product Name</th>
+                                            <th>Description</th>
+                                            <th>Product Category Name</th>
+                                            <th style="width: 10%">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tfoot>
+                                        <tr>
+                                            <th></th>
+                                            <th>Image</th>
+                                            <th>Product Id</th>
+                                            <th>Product Name</th>
+                                            <th>Description</th>
+                                            <th>Product Category Name</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </tfoot>
+                                    <tbody>
+                                        @foreach (var product in Model)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    <input type="checkbox" class="selectProduct" name="productIds"
+                                                        value="@product.ProductId" />
+                                                </td>
+                                                <td>
+                                                    <img src="~/@product.ImagePath" alt="Product Image" width="50"
+                                                        height="50" />
+                                                </td>
+                                                <td>@product.ProductId</td>
+                                                <td>@product.ProductName</td>
+                                                <td>@product.Description</td>
+                                                <td>@product.CategoryName</td>
+                                                <td>
+                                                    <div class="form-button-action">
+                                                        <button type="button" data-bs-toggle="tooltip" title="Edit"
+                                                            class="btn btn-link btn-primary btn-lg"
+                                                            data-original-title="Edit Task">
+                                                            <a asp-action="EditProduct" asp-route-id="@product.ProductId"
+                                                                class="text-decoration-none text-primary">
+                                                                <i class="fa fa-edit"></i>
+                                                            </a>
+                                                        </button>
+                                                        
+                                                        <button type="button" data-bs-toggle="tooltip" title="Remove"
+                                                            class="btn btn-link btn-danger" data-original-title="Remove" onclick="confirmDelete(@product.ProductId)">
+                                                            <i class="fa fa-times"></i>
+                                                        </button>
+                                                        <script>
+                                                            function confirmDelete(){
+                                                                if(confirm("Are you sure you want to delete this product?"))
+                                                                {
+                                                                    window.location.href = '@Url.Action("DeleteProduct","Product")/'+productId;
+                                                                }
+                                                            }
+                                                        </script>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <button type="button" class="btn btn-danger" id="deleteSelectedProducts">
+                                Delete Selected Products
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    document.getElementById('selectAll').addEventListener('click', function () {
+        var isChecked = this.checked;
+        var checkboxes = document.querySelectorAll('.selectProduct');
+        checkboxes.forEach(function (checkbox) {
+            checkbox.checked = isChecked;
+        });
+    });
+
+    document.getElementById('deleteSelectedProducts').addEventListener('click', function () {
+        var selectedProducts = document.querySelectorAll('.selectProduct:checked');
+
+        if (selectedProducts.length === 0) {
+            alert("Please select at least one product to delete.");
+            return;
+        }
+
+        if (confirm("Are you sure you want to delete the selected products? This action cannot be undone.")) {
+            document.getElementById('deleteMultipleForm').submit();
+        }
+    });
+</script>

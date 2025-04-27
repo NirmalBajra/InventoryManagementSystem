@@ -1,0 +1,24 @@
+﻿@* Views/Shared/breadcrumb.cshtml *@
+
+<div class="page-header">
+    <h3 class="fw-bold mb-3">@ViewData["PageTitle"]</h3>
+    <ul class="breadcrumbs mb-3">
+        <li class="nav-home">
+            <a href="/">
+                <i class="fas fa-home"></i>
+            </a>
+        </li>
+        <li class="separator">
+            <i class="fas fa-angle-right"></i>
+        </li>
+        <li class="nav-item">
+            <a href="#">@ViewData["MainItem"]</a>
+        </li>
+        <li class="separator">
+            <i class="fas fa-angle-right"></i>
+        </li>
+        <li class="nav-item">
+            <a href="#">@ViewData["SubItem"]</a>
+        </li>
+    </ul>
+</div>

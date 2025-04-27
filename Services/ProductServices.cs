@@ -48,7 +48,6 @@ public class ProductServices : IProductServices
         await dbContext.SaveChangesAsync();
         tnx.Complete();
     }
-
     //Get all Products
     public async Task<List<ProductVm>> GetAllProduct()
     {
@@ -60,7 +59,8 @@ public class ProductServices : IProductServices
                 ProductName = p.ProductName,
                 Description = p.Description,
                 CategoryName = p.Category.CategoryName,
-                ImagePath = string.IsNullOrEmpty(p.ImagePath) ? "images/default.png" : p.ImagePath
+                ImagePath = string.IsNullOrEmpty(p.ImagePath) ? "images/default.png" : p.ImagePath,
+                CategoryId = p.CategoryId
             }).ToListAsync();
     }
 
@@ -75,10 +75,30 @@ public class ProductServices : IProductServices
             ProductName = p.ProductName,
             Description = p.Description,
             CategoryName = p.Category.CategoryName,   // Mapping from Product to ProductVm
-            ImagePath = string.IsNullOrEmpty(p.ImagePath) ? "images/default.png" : p.ImagePath  // Default image if no image is provided
+            ImagePath = p.ImagePath ?? "images/default.png",  // Default image if no image is provided
+            CategoryId = p.CategoryId
         })
         .ToListAsync();
     }
+
+    //Get Product By Id
+    public async Task<ProductVm> GetProductById(int id)
+    {
+        return await dbContext.Products
+        .Where(p => p.ProductId == id)
+        .Include(p => p.Category)
+        .Select(p => new ProductVm
+        {
+            ProductId = p.ProductId,
+            ProductName = p.ProductName,
+            Description = p.Description,
+            CategoryName = p.Category.CategoryName,
+            ImagePath = string.IsNullOrEmpty(p.ImagePath) ? "images/default.png" : p.ImagePath,
+            CategoryId = p.CategoryId
+        })
+        .FirstOrDefaultAsync();
+    }
+
 
     //Update Product
     public async Task UpdateProduct(ProductUpdateVm vm)
@@ -112,7 +132,6 @@ public class ProductServices : IProductServices
     //Delete Product
     public async Task DeleteProduct(int id)
     {
-        using var tnx = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
         var product = await dbContext.Products.FindAsync(id);
         if (product != null)
         {
@@ -128,7 +147,6 @@ public class ProductServices : IProductServices
             dbContext.Products.Remove(product);
             await dbContext.SaveChangesAsync();
         }
-        tnx.Complete();
     }
 
     //DeleteMultiple Products

@@ -1,0 +1,86 @@
+﻿@model List<InventoryManagementSystem.ViewModels.ProductCategory.ProductCategoryVM>
+@{
+
+    // Breadcrumb values
+    ViewData["PageTitle"] = "View Product Category";
+    ViewData["MainItem"] = "Products Category";
+    ViewData["SubItem"] = "View Product Category";
+}
+
+<div class="container">
+    <div class="page-inner">
+        @await Html.PartialAsync("breadcurm")
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">Product Category List</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table id="multi-filter-select" class="display table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Category Name</th>
+                                        <th>Description</th>
+                                        <th>Is Active</th>
+                                        <th>Created At</th>
+                                    </tr>
+                                </thead>
+                                <tfoot>
+                                    <tr>
+                                        <th>Category Name</th>
+                                        <th>Description</th>
+                                        <th>Is Active</th>
+                                        <th>Created At</th>
+                                    </tr>
+                                </tfoot>
+                                
+                                <tbody>
+                                    @foreach (var item in Model)
+                                    {
+                                        <tr>
+                                            <td>@item.CategoryName</td>
+                                            <td>@item.Description</td>
+                                            <td>@(item.IsActive ? "Yes" : "No")</td>
+                                            <td>@(item.CreatedAt.HasValue ? item.CreatedAt.Value.ToString("yyyy-MM-dd") : "")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+
+                            <a asp-action="AddProductCategory" class="btn btn-primary mt-3">Add New Category</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#multi-filter-select').DataTable({
+                "pageLength": 10,
+                initComplete: function () {
+                    this.api().columns().every(function () {
+                        var column = this;
+                        var select = $('<select class="form-control"><option value=""></option></select>')
+                            .appendTo($(column.footer()).empty())
+                            .on('change', function () {
+                                var val = $.fn.dataTable.util.escapeRegex($(this).val());
+                                column.search(val ? '^' + val + '$' : '', true, false).draw();
+                            });
+
+                        column.data().unique().sort().each(function (d, j) {
+                            select.append('<option value="' + d + '">' + d + '</option>')
+                        });
+                    });
+                }
+            });
+        });
+    </script>
+}

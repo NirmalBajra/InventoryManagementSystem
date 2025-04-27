@@ -1,0 +1,57 @@
+﻿@model InventoryManagementSystem.ViewModels.ProductCategory.ProductCategoryCreateVM
+@{
+    ViewData["Title"] = "AddProductCategory";
+
+    // Breadcrumb values
+    ViewData["PageTitle"] = "Add Product Category";
+    ViewData["MainItem"] = "Products Category";
+    ViewData["SubItem"] = "Add Product Category";
+}
+<link rel="stylesheet" href="../assets/css/bootstrap.min.css" />
+<link rel="stylesheet" href="../assets/css/plugins.min.css" />
+<link rel="stylesheet" href="../assets/css/kaiadmin.min.css" />
+
+<div class="container">
+    <div class="page-inner">
+        @await Html.PartialAsync("breadcurm")
+
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="card">
+                    <div class="card-body">
+                        @if (TempData["SuccessMessage"] != null)
+                        {
+                            <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+                        }
+
+                        @if (!ViewData.ModelState.IsValid && ViewData.ModelState[string.Empty] != null)
+                        {
+                            <div class="alert alert-danger">
+                                @foreach (var error in ViewData.ModelState[string.Empty].Errors)
+                                {
+                                    <p>@error.ErrorMessage</p>
+                                }
+                            </div>
+                        }
+
+                        <form method="post" asp-action="AddProductCategory" asp-controller="ProductCategory">
+                            <div class="mb-3">
+                                <label asp-for="CategoryName" class="form-label"></label>
+                                <input asp-for="CategoryName" class="form-control" required />
+                                <span asp-validation-for="CategoryName" class="text-danger"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="Description" class="form-label"></label>
+                                <input asp-for="Description" type="" class="form-control" required />
+                                <span asp-validation-for="Description" class="text-danger"></span>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100">Add Category</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
