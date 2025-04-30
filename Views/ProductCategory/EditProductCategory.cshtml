@@ -1,0 +1,46 @@
+﻿@model InventoryManagementSystem.ViewModels.ProductCategory.ProductCategoryUpdateVM
+@{
+    ViewData["Title"] = "Edit Product Category";
+
+    ViewData["PageTitle"] = "Edit Product Category";
+    ViewData["MainItem"] = "Products Category";
+    ViewData["SubItem"] = "Edit Product Category";
+}
+
+<div class="container">
+    <div class="page-inner">
+        @await Html.PartialAsync("breadcurm")
+
+        <div class="row">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">Edit Product Category</h4>
+                </div>
+
+                <div class="card-body">
+                    <form asp-action="EditProductCategory" method="post" enctype="multipart/form-data">
+                        <input type="hidden" asp-for="CategoryId" />
+
+                        <div class="mb-3">
+                            <label asp-for="CategoryName" class="form-label"></label>
+                            <input asp-for="CategoryName" class="form-control" required />
+                            <span asp-validation-for="CategoryName" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label"></label>
+                            <input asp-for="Description" type="" class="form-control" required />
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">Add Category</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}

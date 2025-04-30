@@ -1,0 +1,66 @@
+﻿@model InventoryManagementSystem.ViewModels.Suppliers.SupplierVm
+@{
+    ViewData["Title"] = "Add Supplier";
+
+    // Breadcrumb values
+    ViewData["PageTitle"] = "Add Supplier";
+    ViewData["MainItem"] = "Supplier";
+    ViewData["SubItem"] = "Add Supplier";
+}
+
+<div class="container">
+    <div class="page-inner">
+        @await Html.PartialAsync("breadcurm")
+
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="card">
+                    <div class="card-body">
+                        @if (TempData["SuccessMessage"] != null)
+                        {
+                            <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+                        }
+
+                        @if (!ViewData.ModelState.IsValid && ViewData.ModelState[string.Empty] != null)
+                        {
+                            <div class="alert alert-danger">
+                                @foreach (var error in ViewData.ModelState[string.Empty].Errors)
+                                {
+                                    <p>@error.ErrorMessage</p>
+                                }
+                            </div>
+                        }
+
+                        <form method="post" asp-action="AddSupplier" asp-controller="Supplier">
+                            <div class="mb-3">
+                                <label asp-for="SupplierName" class="form-label"></label>
+                                <input asp-for="SupplierName" type="text" class="form-control" required />
+                                <span asp-validation-for="SupplierName" class="text-danger"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="Email" class="form-label"></label>
+                                <input asp-for="Email" type="email" class="form-control" required />
+                                <span asp-validation-for="Email" class="text-danger"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="Contact" class="form-label"></label>
+                                <input asp-for="Contact" type="text" class="form-control" required />
+                                <span asp-validation-for="Contact" class="text-danger"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="Address" class="form-label"></label>
+                                <input asp-for="Address" type="text" class="form-control" required />
+                                <span asp-validation-for="Address" class="text-danger"></span>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100">Add Supplier</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

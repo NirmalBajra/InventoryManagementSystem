@@ -10,5 +10,6 @@ public interface IProductCategoryServices
     Task DeleteProductCategory(int id);
     Task<List<ProductCategoryVM>> GetAllProductCategory();
     Task<ProductCategoryVM> GetProductCategoryByName(string name);
+    Task<ProductCategoryVM> GetProductCategoryById(int id);
     Task DeleteMultipleProductCategories(List<int> categoryIds);
 }

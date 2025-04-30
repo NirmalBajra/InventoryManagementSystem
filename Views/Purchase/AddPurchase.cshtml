@@ -1,0 +1,121 @@
+﻿@model InventoryManagementSystem.ViewModels.Purchase.PurchaseVm
+
+@{
+    ViewData["Title"] = "Add Purchase";
+
+    ViewData["PageTitle"] = "Add Purchase";
+    ViewData["MainItem"] = "Purchase";
+    ViewData["SubItem"] = "Add Purchase";
+}
+
+<div class="container">
+    <div class="page-inner">
+        @await Html.PartialAsync("breadcurm")
+
+        <div class="card">
+            <div class="card-header">
+                <h3>Add New Purchase</h3>
+            </div>
+            <div class="card-body">
+                <form asp-action="AddPurchase" method="post">
+                    <!-- Supplier Selection -->
+                    <div class="mb-3">
+                        <label for="SupplierId" class="form-label">Select Supplier</label>
+                        <select asp-for="SupplierId" class="form-control"
+                            asp-items="@(new SelectList(Model.Suppliers, "SupplierId", "SupplierName"))" required>
+                            <option value="">-- Select Supplier --</option>
+                        </select>
+                        <span asp-validation-for="SupplierId" class="text-danger"></span>
+                    </div>
+
+                    <!-- Product Details Section -->
+                    <div id="purchaseDetails">
+                        <h5>Products</h5>
+                        <div class="row mb-3" id="productRowTemplate">
+                            <div class="col-md-4">
+                                <label>Product</label>
+                                <select name="PurchaseDetails[0].ProductId" class="form-control" required>
+                                    <option value="">-- Select Product --</option>
+                                    @foreach (var product in Model.Products)
+                                    {
+                                        <option value="@product.ProductId" data-category-id="@product.CategoryId" data-category-name="@product.CategoryName">@product.ProductName</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label>Unit Price</label>
+                                <input type="number" name="PurchaseDetails[0].UnitPrice" class="form-control" required />
+                            </div>
+                            <div class="col-md-2">
+                                <label>Quantity</label>
+                                <input type="number" name="PurchaseDetails[0].Quantity" class="form-control" required />
+                            </div>
+                            <div class="col-md-2">
+                                <label>Category</label>
+                                <input type="text" name="PurchaseDetails[0].CategoryName" class="form-control" readonly />
+                            </div>
+                            <div class="col-md-2 d-flex align-items-end">
+                                <button type="button" class="btn btn-danger removeRow">Remove</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn btn-success my-3" id="addProductRow">Add Another Product</button>
+                    </br>
+                    </br>
+                    <button type="submit" class="btn btn-primary">Submit Purchase</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let rowCount = 1;
+
+        // Add new product row to the form
+        $("#addProductRow").click(function () {
+            let newRow = $("#productRowTemplate").clone();
+            newRow.find("select, input").each(function () {
+                const name = $(this).attr("name");
+                const newName = name.replace("[0]", "[" + rowCount + "]");
+                $(this).attr("name", newName);
+                $(this).val('');
+            });
+
+            // Set the CategoryId and CategoryName when a product is selected
+            newRow.find("select[name*='ProductId']").change(function () {
+                const selectedProduct = $(this).find("option:selected");
+                const categoryId = selectedProduct.data("category-id");
+                const categoryName = selectedProduct.data("category-name");
+                newRow.find("input[name*='CategoryId']").val(categoryId); // Store the CategoryId
+                newRow.find("input[name*='CategoryName']").val(categoryName); // Display the CategoryName
+            });
+
+            newRow.appendTo("#purchaseDetails");
+            rowCount++;
+        });
+
+        // Remove product row
+        $(document).on('click', '.removeRow', function () {
+            $(this).closest('#productRowTemplate').remove();
+        });
+
+        // Trigger the category population for all product rows (on page load)
+        function populateCategoryNames() {
+            $("select[name*='ProductId']").each(function () {
+                const selectedProduct = $(this).find("option:selected");
+                const categoryId = selectedProduct.data("category-id");
+                const categoryName = selectedProduct.data("category-name");
+                $(this).closest(".row").find("input[name*='CategoryId']").val(categoryId);
+                $(this).closest(".row").find("input[name*='CategoryName']").val(categoryName);
+            });
+        }
+
+        // Call the function on page load to populate the first product row
+        $(document).ready(function () {
+            populateCategoryNames();
+        });
+    </script>
+}

@@ -16,7 +16,7 @@
             <div class="col-md-12">
                 <div class="card">
                     <div class="card-header">
-                        <h4 class="card-title">Basic</h4>
+                        <h4 class="card-title">Products</h4>
                     </div>
                     <div class="card-body">
                         <form id="deleteMultipleForm" method="post" asp-action="DeleteMultipleProducts">
@@ -78,10 +78,10 @@
                                                             <i class="fa fa-times"></i>
                                                         </button>
                                                         <script>
-                                                            function confirmDelete(){
+                                                            function confirmDelete(@product.ProductId){
                                                                 if(confirm("Are you sure you want to delete this product?"))
                                                                 {
-                                                                    window.location.href = '@Url.Action("DeleteProduct","Product")/'+productId;
+                                                                    window.location.href = '@Url.Action("DeleteProduct","Product")/'+@product.ProductId;
                                                                 }
                                                             }
                                                         </script>

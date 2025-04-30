@@ -18,6 +18,7 @@ builder.Services.AddScoped<ISupplierServices, SupplierServices>();
 builder.Services.AddScoped<IPurchaseService, PurchaseServices>();
 builder.Services.AddScoped<ProductServices>();
 builder.Services.AddScoped<ProductCategoryServices>();
+builder.Services.AddScoped<SupplierServices>();
 
 builder.Services.AddDbContext<FirstRunDbContext>(builder =>
 {

@@ -48,6 +48,7 @@ public class StockService : IStockService
             TotalCost = details.UnitPrice * details.Quantity,
             StockType = Enums.StockType.In,
             CreatedAt = DateTime.UtcNow,
+            UpdatedBy = "System"
         });
         await dbContext.SaveChangesAsync();
     }

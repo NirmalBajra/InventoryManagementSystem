@@ -95,8 +95,7 @@ public class ProductServices : IProductServices
             CategoryName = p.Category.CategoryName,
             ImagePath = string.IsNullOrEmpty(p.ImagePath) ? "images/default.png" : p.ImagePath,
             CategoryId = p.CategoryId
-        })
-        .FirstOrDefaultAsync();
+        }).FirstOrDefaultAsync();
     }
 
 

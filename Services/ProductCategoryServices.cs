@@ -111,4 +111,25 @@ public class ProductCategoryServices : IProductCategoryServices
         }
         return result;
     }
+
+    //Get Product By id
+    public async Task<ProductCategoryVM> GetProductCategoryById(int id)
+    {
+        var result = await dbContext.ProductCategories
+            .Where(c => c.CategoryId == id)
+            .Select(c => new ProductCategoryVM
+            {
+                CategoryId = c.CategoryId,
+                CategoryName = c.CategoryName,
+                Description = c.Description,
+                IsActive = c.IsActive,
+                CreatedAt = c.CreatedAt
+            }).FirstOrDefaultAsync();
+
+        if(result == null)
+        {
+            throw new UserNotFoundException($"Product Category Not Found");
+        }
+        return result;
+    }
 }

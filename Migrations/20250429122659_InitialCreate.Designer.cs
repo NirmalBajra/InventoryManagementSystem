@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace InventoryManagementSystem.Migrations
 {
     [DbContext(typeof(FirstRunDbContext))]
-    [Migration("20250415023303_AddUserStatus")]
-    partial class AddUserStatus
+    [Migration("20250429122659_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -37,6 +37,10 @@ namespace InventoryManagementSystem.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ImagePath")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -89,15 +93,13 @@ namespace InventoryManagementSystem.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("ProductId")
-                        .HasColumnType("integer");
-
                     b.Property<int>("SupplierId")
                         .HasColumnType("integer");
 
-                    b.HasKey("PurchaseId");
+                    b.Property<decimal>("TotalAmount")
+                        .HasColumnType("numeric");
 
-                    b.HasIndex("ProductId");
+                    b.HasKey("PurchaseId");
 
                     b.HasIndex("SupplierId");
 
@@ -115,6 +117,9 @@ namespace InventoryManagementSystem.Migrations
                     b.Property<int>("CategoryId")
                         .HasColumnType("integer");
 
+                    b.Property<int>("ProductId")
+                        .HasColumnType("integer");
+
                     b.Property<int>("PurchaseId")
                         .HasColumnType("integer");
 
@@ -130,6 +135,8 @@ namespace InventoryManagementSystem.Migrations
                     b.HasKey("ProductDetailId");
 
                     b.HasIndex("CategoryId");
+
+                    b.HasIndex("ProductId");
 
                     b.HasIndex("PurchaseId");
 
@@ -202,6 +209,9 @@ namespace InventoryManagementSystem.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("StockId"));
 
+                    b.Property<int>("AvailableQuantity")
+                        .HasColumnType("integer");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -223,11 +233,11 @@ namespace InventoryManagementSystem.Migrations
 
             modelBuilder.Entity("InventoryManagementSystem.Entity.StockFlow", b =>
                 {
-                    b.Property<int>("StockId")
+                    b.Property<int>("StockFlowId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("StockId"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("StockFlowId"));
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -236,6 +246,9 @@ namespace InventoryManagementSystem.Migrations
                         .HasColumnType("integer");
 
                     b.Property<int>("Quantity")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("StockId")
                         .HasColumnType("integer");
 
                     b.Property<int>("StockType")
@@ -251,7 +264,7 @@ namespace InventoryManagementSystem.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.HasKey("StockId");
+                    b.HasKey("StockFlowId");
 
                     b.HasIndex("ProductId");
 
@@ -273,6 +286,9 @@ namespace InventoryManagementSystem.Migrations
                     b.Property<string>("Contact")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -347,19 +363,11 @@ namespace InventoryManagementSystem.Migrations
 
             modelBuilder.Entity("InventoryManagementSystem.Entity.Purchase", b =>
                 {
-                    b.HasOne("InventoryManagementSystem.Entity.Product", "Product")
-                        .WithMany()
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("InventoryManagementSystem.Entity.Supplier", "Supplier")
                         .WithMany("Purchases")
                         .HasForeignKey("SupplierId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Product");
 
                     b.Navigation("Supplier");
                 });
@@ -372,6 +380,12 @@ namespace InventoryManagementSystem.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("InventoryManagementSystem.Entity.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("InventoryManagementSystem.Entity.Purchase", "Purchase")
                         .WithMany("PurchaseDetails")
                         .HasForeignKey("PurchaseId")
@@ -379,6 +393,8 @@ namespace InventoryManagementSystem.Migrations
                         .IsRequired();
 
                     b.Navigation("Category");
+
+                    b.Navigation("Product");
 
                     b.Navigation("Purchase");
                 });

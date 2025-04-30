@@ -1,0 +1,99 @@
+﻿@{
+    ViewData["Title"] = "All Purchases";
+
+    // Breadcrumb values
+    ViewData["PageTitle"] = "View Purchases";
+    ViewData["MainItem"] = "Purchases";
+    ViewData["SubItem"] = "View Purchases";
+}
+
+<div class="container">
+    <div class="page-inner">
+        @await Html.PartialAsync("breadcurm")
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">Purchases</h4>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table id="basic-datatables" class="display table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th><input type="checkbox" id="selectAll" /></th>
+                                        <th>Supplier</th>
+                                        <th>Created At</th>
+                                        <th>Total Amount</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tfoot>
+                                    <tr>
+                                        <th></th>
+                                        <th>Supplier</th>
+                                        <th>Created At</th>
+                                        <th>Total Amount</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </tfoot>
+                                <tbody>
+                                    @foreach (var purchase in Model)
+                                    {
+                                        <tr>
+                                            <td><input type="checkbox" /></td>
+                                            <td>@purchase.SupplierName</td>
+                                            <td>@purchase.CreatedAt.ToString("yyyy-MM-dd")</td>
+                                            <td>@purchase.TotalAmount.ToString("C")</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-info" data-toggle="collapse" data-target="#details-@purchase.PurchaseId">
+                                                    View Details
+                                                </button>
+                                            </td>
+                                        </tr>
+
+                                        <!-- Collapsible Purchase Details Section -->
+                                        <tr id="details-@purchase.PurchaseId" class="collapse">
+                                            <td colspan="5">
+                                                <table class="table table-bordered">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Product Image</th>
+                                                            <th>Product Name</th>
+                                                            <th>Category Name</th>
+                                                            <th>Quantity</th>
+                                                            <th>Unit Price</th>
+                                                            <th>Total Price</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach (var detail in purchase.PurchaseDetails)
+                                                        {
+                                                            <tr>
+                                                                <td>
+                                                                    <!-- Assuming the image URL is available -->
+                                                                    <img src="@detail.Product.ImageUrl" alt="@detail.Product.ProductName" width="50" height="50" />
+                                                                </td>
+                                                                <td>@detail.ProductName</td>
+                                                                <td>@detail.CategoryName</td>
+                                                                <td>@detail.Quantity</td>
+                                                                <td>@detail.UnitPrice.ToString("C")</td>
+                                                                <td>@(detail.Quantity * detail.UnitPrice).ToString("C")</td>
+                                                            </tr>
+                                                        }
+                                                    </tbody>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
