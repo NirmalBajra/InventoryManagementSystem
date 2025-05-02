@@ -49,4 +49,48 @@ public class SupplierController : Controller
         }
         return View(supplier);
     }
+
+    //GET: Edit Suppliers
+    [HttpGet]
+    [Authorize(Roles = "Administrator")]
+    public async Task<IActionResult> EditSupplier(int id)
+    {
+        var supplier = await supplierServices.GetSupplierById(id);
+        if(supplier == null)
+        {
+            return NotFound();
+        }
+
+        var vm = new SupplierVm
+        {
+            SupplierId = supplier.SupplierId,
+            SupplierName = supplier.SupplierName,
+            Contact = supplier.Contact,
+            Email = supplier.Email,
+            Address = supplier.Address
+        };
+        return View(vm);
+    }
+
+    //Post: Edit Supplier
+    [HttpPost]
+    [Authorize(Roles = "Administrator")]
+    public async Task<IActionResult> EditSupplier(SupplierVm vm)
+    {
+        if(ModelState.IsValid)
+        {
+            await supplierServices.UpdateSupplier(vm);
+            return RedirectToAction(nameof(ViewSupplier));
+        }
+        return View(vm);
+    }
+
+    //Delete Suppliers
+    [HttpPost]
+    [Authorize(Roles = "Administrator")]
+    public async Task<IActionResult> DeleteSupplier(int id)
+    {
+        await supplierServices.DeleteSupplier(id);
+        return RedirectToAction(nameof(ViewSupplier));
+    }
 }

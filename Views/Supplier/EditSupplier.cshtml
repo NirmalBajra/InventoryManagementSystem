@@ -1,0 +1,54 @@
+﻿@model InventoryManagementSystem.ViewModels.Suppliers.SupplierVm
+@{
+    ViewData["Title"] = "Edit Supplier";
+
+    ViewData["PageTitle"] = "Edit Supplier";
+    ViewData["MainItem"] = "Supplier";
+    ViewData["SubItem"] = "Edit Supplier";
+}
+
+<div class="container">
+    <div class="page-inner">
+        @await Html.PartialAsync("breadcurm");
+
+        <div class="row">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">Edit Supplier</h4>
+                </div>
+
+                <div class="card-body">
+                    <form asp-action="EditSupplier" method="post" enctype="multipart/form-data">
+                        <input type="hidden" asp-for="SupplierId" />
+
+                        <div class="mb-3">
+                            <label asp-for="SupplierName" class="form-label"></label>
+                            <input asp-for="SupplierName" type="text" class="form-control" required />
+                            <span asp-validation-for="SupplierName" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label"></label>
+                            <input asp-for="Email" type="email" class="form-control" required />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Contact" class="form-label"></label>
+                            <input asp-for="Contact" type="text" class="form-control" required />
+                            <span asp-validation-for="Contact" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Address" class="form-label"></label>
+                            <input asp-for="Address" type="text" class="form-control" required />
+                            <span asp-validation-for="Address" class="text-danger"></span>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">Edit Supplier</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
