@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace InventoryManagementSystem.Migrations
 {
     [DbContext(typeof(FirstRunDbContext))]
-    [Migration("20250429122659_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20250607124700_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -90,7 +90,7 @@ namespace InventoryManagementSystem.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("PurchaseId"));
 
-                    b.Property<DateTime>("CreatedAt")
+                    b.Property<DateTime>("PurchaseDate")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("SupplierId")
@@ -108,11 +108,11 @@ namespace InventoryManagementSystem.Migrations
 
             modelBuilder.Entity("InventoryManagementSystem.Entity.PurchaseDetails", b =>
                 {
-                    b.Property<int>("ProductDetailId")
+                    b.Property<int>("ProductDetailsId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ProductDetailId"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ProductDetailsId"));
 
                     b.Property<int>("CategoryId")
                         .HasColumnType("integer");
@@ -126,13 +126,10 @@ namespace InventoryManagementSystem.Migrations
                     b.Property<int>("Quantity")
                         .HasColumnType("integer");
 
-                    b.Property<decimal>("TotalPrice")
-                        .HasColumnType("numeric");
-
                     b.Property<decimal>("UnitPrice")
                         .HasColumnType("numeric");
 
-                    b.HasKey("ProductDetailId");
+                    b.HasKey("ProductDetailsId");
 
                     b.HasIndex("CategoryId");
 

@@ -20,7 +20,7 @@ namespace InventoryManagementSystem.Controllers
         public async Task<ActionResult> ViewProductCategory()
         {
             var category = await productCategoryServices.GetAllProductCategory();
-            if(category == null)
+            if (category == null)
             {
                 return NotFound();
             }

@@ -1,98 +1,57 @@
-﻿@{
-    ViewData["Title"] = "All Purchases";
+﻿@model List<InventoryManagementSystem.Dtos.PurchaseDtos.PurchaseListDto>
 
-    // Breadcrumb values
-    ViewData["PageTitle"] = "View Purchases";
-    ViewData["MainItem"] = "Purchases";
-    ViewData["SubItem"] = "View Purchases";
+@{
+    ViewData["Title"] = "Purchase List";
+    ViewData["PageTitle"] = "Purchase List";
+    ViewData["MainItem"] = "Purchase";
+    ViewData["SubItem"] = "List";
 }
 
 <div class="container">
     <div class="page-inner">
         @await Html.PartialAsync("breadcurm")
 
-        <div class="row">
-            <div class="col-md-12">
-                <div class="card">
-                    <div class="card-header">
-                        <h4 class="card-title">Purchases</h4>
-                    </div>
-
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table id="basic-datatables" class="display table table-striped table-hover">
-                                <thead>
-                                    <tr>
-                                        <th><input type="checkbox" id="selectAll" /></th>
-                                        <th>Supplier</th>
-                                        <th>Created At</th>
-                                        <th>Total Amount</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                                <tfoot>
-                                    <tr>
-                                        <th></th>
-                                        <th>Supplier</th>
-                                        <th>Created At</th>
-                                        <th>Total Amount</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </tfoot>
-                                <tbody>
-                                    @foreach (var purchase in Model)
-                                    {
-                                        <tr>
-                                            <td><input type="checkbox" /></td>
-                                            <td>@purchase.SupplierName</td>
-                                            <td>@purchase.CreatedAt.ToString("yyyy-MM-dd")</td>
-                                            <td>@purchase.TotalAmount.ToString("C")</td>
-                                            <td>
-                                                <button class="btn btn-sm btn-info" data-toggle="collapse" data-target="#details-@purchase.PurchaseId">
-                                                    View Details
-                                                </button>
-                                            </td>
-                                        </tr>
-
-                                        <!-- Collapsible Purchase Details Section -->
-                                        <tr id="details-@purchase.PurchaseId" class="collapse">
-                                            <td colspan="5">
-                                                <table class="table table-bordered">
-                                                    <thead>
-                                                        <tr>
-                                                            <th>Product Image</th>
-                                                            <th>Product Name</th>
-                                                            <th>Category Name</th>
-                                                            <th>Quantity</th>
-                                                            <th>Unit Price</th>
-                                                            <th>Total Price</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        @foreach (var detail in purchase.PurchaseDetails)
-                                                        {
-                                                            <tr>
-                                                                <td>
-                                                                    <!-- Assuming the image URL is available -->
-                                                                    <img src="@detail.Product.ImageUrl" alt="@detail.Product.ProductName" width="50" height="50" />
-                                                                </td>
-                                                                <td>@detail.ProductName</td>
-                                                                <td>@detail.CategoryName</td>
-                                                                <td>@detail.Quantity</td>
-                                                                <td>@detail.UnitPrice.ToString("C")</td>
-                                                                <td>@(detail.Quantity * detail.UnitPrice).ToString("C")</td>
-                                                            </tr>
-                                                        }
-                                                    </tbody>
-                                                </table>
-                                            </td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
+        <div class="card">
+            <div class="card-header">
+                <h3>All Purchases</h3>
+            </div>
+            <div class="card-body">
+                <table class="table table-bordered table-hover">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>#</th>
+                            <th>Supplier</th>
+                            <th>Purchase Date</th>
+                            <th>Total Amount</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Count == 0)
+                        {
+                            <tr>
+                                <td colspan="5" class="text-center">No purchases found.</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            int index = 1;
+                            foreach (var purchase in Model)
+                            {
+                                <tr>
+                                    <td>@index</td>
+                                    <td>@purchase.SupplierName</td>
+                                    <td>@purchase.PurchaseDate.ToString("yyyy-MM-dd HH:mm")</td>
+                                    <td>Rs. @purchase.TotalAmount.ToString("N2")</td>
+                                    <td>
+                                        <a asp-action="Details" asp-route-id="@purchase.Id" class="btn btn-sm btn-info">View</a>
+                                    </td>
+                                </tr>
+                                index++;
+                            }
+                        }
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>

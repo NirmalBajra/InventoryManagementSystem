@@ -1,5 +1,6 @@
 using System.Transactions;
 using InventoryManagementSystem.Data;
+using InventoryManagementSystem.Dto;
 using InventoryManagementSystem.Entity;
 using InventoryManagementSystem.Services.Interfaces;
 using InventoryManagementSystem.ViewModels.Product;
@@ -7,6 +8,7 @@ using InventoryManagementSystem.ViewModels.Purchase;
 using InventoryManagementSystem.ViewModels.Suppliers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
 namespace InventoryManagementSystem.Controllers
@@ -32,61 +34,26 @@ namespace InventoryManagementSystem.Controllers
         [Authorize(Roles = "Administrator")]
         public IActionResult AddPurchase()
         {
-            var products = dbContext.Products
-                .Select(p => new ProductVm
-                {
-                    ProductId = p.ProductId,
-                    ProductName = p.ProductName,
-                    CategoryId = p.CategoryId,
-                    CategoryName = p.Category.CategoryName
-                }).ToList();
-
-            var suppliers = dbContext.Suppliers
-                .Select(s => new SupplierVm
-                {
-                    SupplierId = s.SupplierId,
-                    SupplierName = s.SupplierName,
-                }).ToList();
-
-            var vm = new PurchaseVm
-            {
-                Products = products,
-                Suppliers = suppliers
-            };
-
-            return View(vm);
+            ViewBag.Suppliers = new SelectList(dbContext.Suppliers, "SupplierId", "SupplierName");
+            ViewBag.Products = new SelectList(dbContext.Products, "ProductId", "ProductName");
+            ViewBag.Categories = new SelectList(dbContext.ProductCategories, "CategoryId", "CategoryName");
+            return View();
         }
 
-        // POST: /Purchase/AddPurchase
         [HttpPost]
-        [ValidateAntiForgeryToken]
         [Authorize(Roles = "Administrator")]
-        public async Task<IActionResult> AddPurchase(PurchaseVm vm)
+        public async Task<IActionResult> AddPurchase(PurchaseDto dto)
         {
-            if (!ModelState.IsValid)
+            if (ModelState.IsValid)
             {
-                var products = dbContext.Products.Select(p => new ProductVm
-                {
-                    ProductId = p.ProductId,
-                    ProductName = p.ProductName,
-                    CategoryId = p.CategoryId,
-                    CategoryName = p.Category.CategoryName
-                }).ToList();
-
-                var suppliers = dbContext.Suppliers.Select(s => new SupplierVm
-                {
-                    SupplierId = s.SupplierId,
-                    SupplierName = s.SupplierName
-                }).ToList();
-
-                vm.Products = products;
-                vm.Suppliers = suppliers;
-
-                return View(vm);
+                await purchaseService.AddPurchaseAsync(dto);
+                return RedirectToAction("AddPurchase");
             }
+            ViewBag.Suppliers = new SelectList(dbContext.Suppliers, "SupplierId", "SupplierName");
+            ViewBag.Products = new SelectList(dbContext.Products, "ProductId", "ProductName");
+            ViewBag.Categories = new SelectList(dbContext.ProductCategories, "CategoryId", " CategoryName");
 
-            await purchaseService.AddPurchase(vm);
-            return RedirectToAction(nameof(ViewPurchases));
+            return View(dto);
         }
 
         // GET: /Purchase/ViewPurchases
@@ -94,8 +61,23 @@ namespace InventoryManagementSystem.Controllers
         [Authorize]
         public async Task<IActionResult> ViewPurchases()
         {
-            var purchases = await purchaseService.GetAllPurchases(); 
+            var purchases = await purchaseService.GetAllPurchasesAsync();
             return View(purchases);
+        }
+
+
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> Details(int id)
+        {
+            var purchase = await purchaseService.GetPurchaseByIdAsync(id);
+
+            if (purchase == null)
+            {
+                return NotFound();
+            }
+
+            return View(purchase);
         }
     }
 }

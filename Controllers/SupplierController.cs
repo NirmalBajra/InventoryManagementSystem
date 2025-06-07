@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace InventoryManagementSystem.Controllers;
-
 public class SupplierController : Controller
 {
     private readonly FirstRunDbContext dbContext;

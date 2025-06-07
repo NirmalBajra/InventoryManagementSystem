@@ -1,4 +1,6 @@
 using System;
+using InventoryManagementSystem.Dto;
+using InventoryManagementSystem.Dtos.PurchaseDtos;
 using InventoryManagementSystem.Entity;
 using InventoryManagementSystem.ViewModels.Purchase;
 
@@ -6,9 +8,7 @@ namespace InventoryManagementSystem.Services.Interfaces;
 
 public interface IPurchaseService
 {
-    Task<PurchaseVm> AddPurchase(PurchaseVm vm);
-    Task<List<PurchaseListVm>> GetAllPurchases();
-    Task<Purchase?> GetPurchaseById(int id);
-    Task<bool> UpdatePurchase(int id, PurchaseVm vm);
-    Task<bool> DeletePurchase(int id);
+    Task AddPurchaseAsync(PurchaseDto dto);
+    Task<List<PurchaseListDto>> GetAllPurchasesAsync();
+    Task<Purchase> GetPurchaseByIdAsync(int id);
 }

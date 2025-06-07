@@ -13,7 +13,7 @@ namespace InventoryManagementSystem.Controllers
         private readonly ProductServices productServices;
         private readonly ILogger<ProductController> logger;
         private readonly ProductCategoryServices productCategoryServices;
-        public ProductController(ProductServices productServices, ProductCategoryServices productCategoryServices,ILogger<ProductController> logger)
+        public ProductController(ProductServices productServices, ProductCategoryServices productCategoryServices, ILogger<ProductController> logger)
         {
             this.productServices = productServices;
             this.productCategoryServices = productCategoryServices;
@@ -139,13 +139,15 @@ namespace InventoryManagementSystem.Controllers
                 await productServices.DeleteProduct(id);
                 TempData["SuccessMessage"] = "Product Deleted Successfully.";
                 return RedirectToAction(nameof(ViewProduct));
-            }catch(DbUpdateException dbEx){
-                logger.LogError(dbEx,"Database error while deleting product ID {ProductId}",id);
+            }
+            catch (DbUpdateException dbEx)
+            {
+                logger.LogError(dbEx, "Database error while deleting product ID {ProductId}", id);
                 TempData["ErrorMessage"] = "A database error occured. Please try again.";
             }
             catch (Exception ex)
             {
-                logger.LogError(ex,"Unexpected error deleting product Id {ProductId}",id);
+                logger.LogError(ex, "Unexpected error deleting product Id {ProductId}", id);
                 TempData["ErrorMessage"] = "There was an error deleting the product. Please try again.";
             }
             return RedirectToAction(nameof(ViewProduct));

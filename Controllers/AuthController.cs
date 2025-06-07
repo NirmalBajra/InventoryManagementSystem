@@ -8,7 +8,6 @@ using InventoryManagementSystem.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 
 namespace InventoryManagementSystem.Controllers;
-
 public class AuthController : Controller
 {
     private readonly FirstRunDbContext dbContext;

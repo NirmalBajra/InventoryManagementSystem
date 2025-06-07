@@ -8,9 +8,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace InventoryManagementSystem.Controllers;
-
 public class SeedingController : Controller
 {
+    
     private readonly FirstRunDbContext dbContext;
     private readonly IUserServices userServices;
 

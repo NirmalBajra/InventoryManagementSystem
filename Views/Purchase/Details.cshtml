@@ -1,24 +1,65 @@
-﻿@{
+﻿@model InventoryManagementSystem.Entity.Purchase
+
+@{
     ViewData["Title"] = "Purchase Details";
+    ViewData["PageTitle"] = "Purchase Details";
+    ViewData["MainItem"] = "Purchase";
+    ViewData["SubItem"] = "Details";
 }
 
-<div class="container mt-4">
-    <h2>Purchase Details</h2>
-    
+<div class="container">
+    <div class="page-inner">
+        @await Html.PartialAsync("breadcurm")
 
-    <table class="table table-striped table-bordered">
-        <thead>
-            <tr>
-                <th>Product</th>
-                <th>Category</th>
-                <th>Unit Price</th>
-                <th>Quantity</th>
-                <th>Total Price</th>
-            </tr>
-        </thead>
-        <tbody>
-            
-        </tbody>
-    </table>
+        <div class="card">
+            <div class="card-header">
+                <h3>Purchase Details</h3>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-3">Supplier</dt>
+                    <dd class="col-sm-9">@Model.Supplier?.SupplierName</dd>
 
+                    <dt class="col-sm-3">Purchase Date</dt>
+                    <dd class="col-sm-9">@Model.PurchaseDate.ToString("yyyy-MM-dd HH:mm")</dd>
+
+                    <dt class="col-sm-3">Total Amount</dt>
+                    <dd class="col-sm-9">Rs. @Model.TotalAmount.ToString("N2")</dd>
+                </dl>
+
+                <h4 class="mt-4">Items Purchased</h4>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Product</th>
+                            <th>Category</th>
+                            <th>Quantity</th>
+                            <th>Unit Price</th>
+                            <th>Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            int i = 1;
+                            foreach (var item in Model.PurchaseDetails)
+                            {
+                                <tr>
+                                    <td>@i</td>
+                                    <td>@item.Product?.ProductName</td>
+                                    <td>@item.Product?.Category?.CategoryName</td>
+                                    <td>@item.Quantity</td>
+                                    <td>Rs. @item.UnitPrice.ToString("N2")</td>
+                                    <td>Rs. @((item.Quantity * item.UnitPrice).ToString("N2"))</td>
+                                </tr>
+                                i++;
+                            }
+                        }
+                    </tbody>
+                </table>
+
+                <a asp-action="ViewPurchases" class="btn btn-secondary">Back to List</a>
+            </div>
+        </div>
+    </div>
 </div>

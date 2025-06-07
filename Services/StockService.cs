@@ -19,13 +19,14 @@ public class StockService : IStockService
     {
         var existingStock = await dbContext.Stocks
             .FirstOrDefaultAsync(s => s.ProductId == details.ProductId && s.UnitPrice == details.UnitPrice);
-        
-        if(existingStock != null)
+
+        if (existingStock != null)
         {
             existingStock.Quantity += details.Quantity;
-            existingStock.AvailableQuantity +=details.Quantity;
+            existingStock.AvailableQuantity += details.Quantity;
         }
-        else{
+        else
+        {
             existingStock = new Stock
             {
                 ProductId = details.ProductId,
@@ -53,6 +54,8 @@ public class StockService : IStockService
         await dbContext.SaveChangesAsync();
     }
 
+
+
     // Get Stock for Products
     public async Task<List<Stock>> GetStocksForProduct(int productId)
     {
@@ -68,13 +71,13 @@ public class StockService : IStockService
         var stocks = await GetStocksForProduct(productId);
         int remaining = quantity;
 
-        foreach(var stock in stocks)
+        foreach (var stock in stocks)
         {
-            if(remaining <= 0 ) break;
+            if (remaining <= 0) break;
 
             int deductQty = Math.Min(stock.AvailableQuantity, remaining);
-            stock.AvailableQuantity -=deductQty;
-            remaining -=deductQty;
+            stock.AvailableQuantity -= deductQty;
+            remaining -= deductQty;
 
             dbContext.StockFlows.Add(new StockFlow
             {
