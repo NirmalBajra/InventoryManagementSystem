@@ -11,4 +11,6 @@ public interface IPurchaseService
     Task AddPurchaseAsync(PurchaseDto dto);
     Task<List<PurchaseListDto>> GetAllPurchasesAsync();
     Task<Purchase> GetPurchaseByIdAsync(int id);
+    Task DeletePurchaseAsync(int purchaseId);
+    Task UpdatePurchaseAsync(int purchaseId, PurchaseDto dto);
 }

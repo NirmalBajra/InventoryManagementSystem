@@ -1,0 +1,62 @@
+﻿@model InventoryManagementSystem.Dto.PurchaseDto
+
+@{
+    ViewData["Title"] = "Edit Purchase";
+    ViewData["PageTitle"] = "Edit Purchase";
+    ViewData["MainItem"] = "Edit";
+    ViewData["SubItem"] = "Edit Purchase";
+}
+
+<div class="container">
+    <div class="page-inner">
+        @await Html.PartialAsync("breadcurm")
+
+        <div class="card">
+            <div class="card-header">
+                <h2>Edit Purchase</h2>
+            </div>
+
+            <div class="card-body">
+                <form asp-action="Edit" method="post">
+                    <input type="hidden" asp-for="PurchaseId" />
+
+                    <div class="form-group">
+                        <label asp-for="SupplierId">Supplier</label>
+                        <select asp-for="SupplierId" class="form-control" asp-items="ViewBag.Suppliers"></select>
+                    </div>
+
+                    <h4>Purchase Items</h4>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Quantity</th>
+                                <th>Unit Price</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (int i = 0; i < Model.PurchaseDetails.Count; i++)
+                            {
+                                <tr>
+                                    <td>
+                                        <select asp-for="PurchaseDetails[@i].ProductId" class="form-control"
+                                            asp-items="ViewBag.Products"></select>
+                                    </td>
+                                    <td>
+                                        <input asp-for="PurchaseDetails[@i].Quantity" class="form-control" />
+                                    </td>
+                                    <td>
+                                        <input asp-for="PurchaseDetails[@i].UnitPrice" class="form-control" />
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+
+                    <button type="submit" class="btn btn-primary">Update Purchase</button>
+                    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

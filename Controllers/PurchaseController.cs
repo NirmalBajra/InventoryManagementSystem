@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-
+using AutoMapper;
 namespace InventoryManagementSystem.Controllers
 {
     public class PurchaseController : Controller
@@ -20,13 +20,15 @@ namespace InventoryManagementSystem.Controllers
         private readonly ISupplierServices supplierServices;
         private readonly IProductServices productServices;
         private readonly IStockService stockService;
-        public PurchaseController(FirstRunDbContext dbContext, IPurchaseService purchaseService, ISupplierServices supplierServices, IProductServices productServices, IStockService stockService)
+        private readonly IMapper mapper;
+        public PurchaseController(FirstRunDbContext dbContext, IPurchaseService purchaseService, ISupplierServices supplierServices, IProductServices productServices, IStockService stockService, IMapper mapper)
         {
             this.dbContext = dbContext;
             this.purchaseService = purchaseService;
             this.supplierServices = supplierServices;
             this.productServices = productServices;
             this.stockService = stockService;
+            this.mapper = mapper;
         }
 
         // GET: /Purchase/AddPurchase
@@ -78,6 +80,35 @@ namespace InventoryManagementSystem.Controllers
             }
 
             return View(purchase);
+        }
+
+        public async Task<IActionResult> Edit(int id)
+        {
+            var purchase = await purchaseService.GetPurchaseByIdAsync(id);
+            if (purchase == null) return NotFound();
+
+            var dto = mapper.Map<PurchaseDto>(purchase);
+
+            ViewBag.Suppliers = new SelectList(await supplierServices.GetAllSuppliers(), "SupplierId", "SupplierName");
+            ViewBag.Products = new SelectList(await productServices.GetAllProduct(), "ProductId", "ProductName");
+
+            return View(dto);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Edit(int id, PurchaseDto dto)
+        {
+            if (!ModelState.IsValid) return View(dto);
+
+            await purchaseService.UpdatePurchaseAsync(id, dto);
+            return RedirectToAction("ViewPurchases");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Delete(int id)
+        {
+            await purchaseService.DeletePurchaseAsync(id);
+            return RedirectToAction("ViewPurchases"); // Or wherever you list your purchases
         }
     }
 }

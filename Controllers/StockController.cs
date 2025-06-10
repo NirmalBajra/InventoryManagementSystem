@@ -5,7 +5,7 @@ namespace InventoryManagementSystem.Controllers
     public class StockController : Controller
     {
         // GET: StockController
-        public ActionResult Index()
+        public IActionResult ViewStock()
         {
             return View();
         }

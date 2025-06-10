@@ -14,46 +14,6 @@ public class StockService : IStockService
         this.dbContext = dbContext;
     }
 
-    //Update Stock on Purchase
-    public async Task UpdateStockOnPurchase(PurchaseDetails details)
-    {
-        var existingStock = await dbContext.Stocks
-            .FirstOrDefaultAsync(s => s.ProductId == details.ProductId && s.UnitPrice == details.UnitPrice);
-
-        if (existingStock != null)
-        {
-            existingStock.Quantity += details.Quantity;
-            existingStock.AvailableQuantity += details.Quantity;
-        }
-        else
-        {
-            existingStock = new Stock
-            {
-                ProductId = details.ProductId,
-                Quantity = details.Quantity,
-                AvailableQuantity = details.Quantity,
-                UnitPrice = details.UnitPrice,
-                CreatedAt = DateTime.UtcNow
-            };
-
-            dbContext.Stocks.Add(existingStock);
-            await dbContext.SaveChangesAsync();
-        }
-
-        dbContext.StockFlows.Add(new StockFlow
-        {
-            StockId = existingStock.StockId,
-            ProductId = details.ProductId,
-            Quantity = details.Quantity,
-            UnitPrice = details.UnitPrice,
-            TotalCost = details.UnitPrice * details.Quantity,
-            StockType = Enums.StockType.In,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedBy = "System"
-        });
-        await dbContext.SaveChangesAsync();
-    }
-
 
 
     // Get Stock for Products

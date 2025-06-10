@@ -1,5 +1,6 @@
 using InventoryManagementSystem.Data;
 using InventoryManagementSystem.Entity;
+using InventoryManagementSystem.Mapping;
 using InventoryManagementSystem.Services;
 using InventoryManagementSystem.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -19,6 +20,7 @@ builder.Services.AddScoped<IPurchaseService, PurchaseServices>();
 builder.Services.AddScoped<ProductServices>();
 builder.Services.AddScoped<ProductCategoryServices>();
 builder.Services.AddScoped<SupplierServices>();
+builder.Services.AddAutoMapper(typeof(MappingProfile));
 
 builder.Services.AddDbContext<FirstRunDbContext>(builder =>
 {
