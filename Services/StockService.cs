@@ -1,6 +1,8 @@
 using System;
 using InventoryManagementSystem.Data;
+using InventoryManagementSystem.Dtos.StockDtos;
 using InventoryManagementSystem.Entity;
+using InventoryManagementSystem.Helpers;
 using InventoryManagementSystem.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -86,5 +88,30 @@ public class StockService : IStockService
             });
         }
         await dbContext.SaveChangesAsync();
+    }
+
+    public async Task<List<ViewStockDto>> ViewStockAsync()
+    {
+        try
+        {
+            var stockList = await dbContext.Stocks
+                .Include(s => s.Product)
+                .ThenInclude(p => p.Category)
+                .Select(s => new ViewStockDto
+                {
+                    ProductId = s.ProductId,
+                    ProductName = s.Product.ProductName,
+                    CategoryName = s.Product.Category.CategoryName,
+                    AvailableQuantity = s.AvailableQuantity,
+                    UnitPrice = s.UnitPrice,
+                    ImagePath = s.Product.ImagePath,
+                    Quantity = s.Quantity
+                }).ToListAsync();
+            return stockList;
+        }
+        catch (Exception ex)
+        {
+            throw new UserNotFoundException("Stock Not found." + ex.Message);
+        }
     }
 }

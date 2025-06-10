@@ -1,4 +1,6 @@
-﻿@{
+﻿@model List<InventoryManagementSystem.Dtos.StockDtos.ViewStockDto>
+
+@{
     ViewData["Title"] = "Stock Flow";
     ViewData["PageTitle"] = "Stock Flow";
     ViewData["MainItem"] = "View Stock";
@@ -8,14 +10,59 @@
 <div class="container">
     <div class="page-inner">
         @await Html.PartialAsync("breadcurm")
-        <div class="card">
-            <div class="card-header">
-                <h3>Stock Flow</h3>
-            </div>
 
-            <div class="card-body">
-                
-            </div>
+        <div class="card mt-4">
+        <div class="card-header">
+            <h3 class="mb-0">Stock Flow</h3>
+        </div>
+
+        <div class="card-body">
+            @if (Model != null && Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>Image</th>
+                                <th>Product Name</th>
+                                <th>Category</th>
+                                <th>Quantity</th>
+                                <th>Available Quantity</th>
+                                <th>Unit Price</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(item.ImagePath))
+                                        {
+                                            <img src="~/@item.ImagePath" alt="Product Image" width="50" height="50" />
+                                        }
+                                        else
+                                        {
+                                            <img src="~/img/images/default.png" alt="No Image" width="50" height="50" />
+                                        }
+                                    </td>
+                                    <td>@item.ProductName</td>
+                                    <td>@item.CategoryName</td>
+                                    <td>@item.Quantity</td>
+                                    <td>@item.AvailableQuantity</td>
+                                    <td>@item.UnitPrice.ToString("C")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info">
+                    No stock data available.
+                </div>
+            }
         </div>
     </div>
+</div>
 </div>
