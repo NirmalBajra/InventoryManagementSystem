@@ -14,6 +14,8 @@ builder.Services.AddScoped<IUserServices, UserServices>();
 builder.Services.AddScoped<IProductCategoryServices, ProductCategoryServices>();
 builder.Services.AddScoped<IProductServices, ProductServices>();
 builder.Services.AddScoped<IStockService, StockService>();
+builder.Services.AddScoped<IStockAlertService, StockAlertService>();
+builder.Services.AddScoped<IInvoiceService, InvoiceService>();
 builder.Services.AddScoped<ISalesService, SalesService>();
 builder.Services.AddScoped<ISupplierServices, SupplierServices>();
 builder.Services.AddScoped<IPurchaseService, PurchaseServices>();
@@ -74,16 +76,14 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseStaticFiles();
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
-
-app.MapStaticAssets();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}")
-    .WithStaticAssets();
-
+    pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();

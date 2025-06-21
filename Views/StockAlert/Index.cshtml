@@ -1,0 +1,141 @@
+@model List<InventoryManagementSystem.Entity.StockAlert>
+@{
+    ViewData["Title"] = "Stock Alerts";
+    ViewData["PageTitle"] = "Stock Alerts";
+    ViewData["MainItem"] = "Stock";
+    ViewData["SubItem"] = "Alerts";
+}
+
+<div class="container">
+    <div class="page-inner">
+        @await Html.PartialAsync("breadcurm")
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="d-flex align-items-center">
+                            <h4 class="card-title">Stock Alerts</h4>
+                            <div class="ml-auto">
+                                <form method="post" asp-action="CheckStockAlerts" style="display: inline; margin-left: 5px;">
+                                    <button type="submit" class="btn btn-primary btn-sm">
+                                        <i class="fa fa-refresh"></i> Check Alerts
+                                    </button>
+                                </form>
+                                
+                                <form method="post" asp-action="MarkAllAsRead" style="display: inline;">
+                                    <button type="submit" class="btn btn-success btn-sm">
+                                        <i class="fa fa-check"></i> Mark All as Read
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        @if (TempData["SuccessMessage"] != null)
+                        {
+                            <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+                        }
+
+                        @if (TempData["ErrorMessage"] != null)
+                        {
+                            <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+                        }
+
+                        @if (!Model.Any())
+                        {
+                            <div class="text-center py-4">
+                                <i class="fa fa-check-circle text-success" style="font-size: 3rem;"></i>
+                                <h5 class="mt-3">No Stock Alerts</h5>
+                                <p class="text-muted">All stock levels are within normal ranges.</p>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Product</th>
+                                            <th>Alert Type</th>
+                                            <th>Message</th>
+                                            <th>Status</th>
+                                            <th>Created</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var alert in Model)
+                                        {
+                                            <tr class="@(alert.IsRead ? "" : "table-warning")">
+                                                <td>
+                                                    <strong>@alert.Product?.ProductName</strong>
+                                                    <br>
+                                                    <small class="text-muted">ID: @alert.ProductId</small>
+                                                </td>
+                                                <td>
+                                                    @if (alert.AlertType == "LowStock")
+                                                    {
+                                                        <span class="badge badge-warning">Low Stock</span>
+                                                    }
+                                                    else if (alert.AlertType == "OutOfStock")
+                                                    {
+                                                        <span class="badge badge-danger">Out of Stock</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge badge-info">@alert.AlertType</span>
+                                                    }
+                                                </td>
+                                                <td>@alert.Message</td>
+                                                <td>
+                                                    @if (alert.IsRead)
+                                                    {
+                                                        <span class="badge badge-success">Read</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge badge-warning">Unread</span>
+                                                    }
+                                                </td>
+                                                <td>@alert.CreatedAt.ToString("MMM dd, yyyy HH:mm")</td>
+                                                <td>
+                                                    @if (!alert.IsRead)
+                                                    {
+                                                        <form method="post" asp-action="MarkAsRead" style="display: inline;">
+                                                            <input type="hidden" name="alertId" value="@alert.AlertId" />
+                                                            <button type="submit" class="btn btn-sm btn-success">
+                                                                <i class="fa fa-check"></i> Mark Read
+                                                            </button>
+                                                        </form>
+                                                    }
+                                                    <a href="@Url.Action("ViewProduct", "Product", new { id = alert.ProductId })" class="btn btn-sm btn-info">
+                                                        <i class="fa fa-eye"></i> View Product
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Auto-refresh unread count every 30 seconds
+        setInterval(function() {
+            $.get('@Url.Action("GetUnreadCount")', function(data) {
+                if (data.count > 0) {
+                    // Update notification badge if exists
+                    $('.alert-count').text(data.count);
+                }
+            });
+        }, 30000);
+    </script>
+} 

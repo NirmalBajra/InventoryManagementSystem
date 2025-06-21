@@ -28,7 +28,10 @@
                                     <th>Email</th>
                                     <th>Contact</th>
                                     <th>Address</th>
-                                    <th style="width: 10%">Action</th>
+                                    @if (User.IsInRole("Administrator"))
+                                    {
+                                        <th style="width: 10%">Action</th>
+                                    }
                                 </tr>
                             </thead>
 
@@ -38,7 +41,10 @@
                                     <th>Email</th>
                                     <th>Contact</th>
                                     <th>Address</th>
-                                    <th>Action</th>
+                                    @if (User.IsInRole("Administrator"))
+                                    {
+                                        <th>Action</th>
+                                    }
                                 </tr>
                             </tfoot>
 
@@ -50,40 +56,46 @@
                                         <td>@item.Email</td>
                                         <td>@item.Contact</td>
                                         <td>@item.Address</td>
-                                        <td>
-                                            <div class="form-button-action">
-                                                <button type="button" data-bs-toggle="tooltip" title="Edit"
-                                                    class="btn btn-link btn-primary btn-lg" data-original-title="Edit Task">
-                                                    <a asp-action="EditSupplier" asp-route-id="@item.SupplierId"
-                                                        class="text-decoration-none text-primary">
-                                                        <i class="fa fa-edit"></i>
-                                                    </a>
-                                                </button>
-
-                                                <form asp-action="DeleteSupplier" asp-controller="Supplier" method="post"
-                                                    style="display:inline;" id="deleteForm-@item.SupplierId">
-                                                    <input type="hidden" name="id" value="@item.SupplierId" />
-                                                    <button type="button" class="btn btn-link btn-danger"
-                                                        onclick="confirmDelete(@item.SupplierId)">
-                                                        <i class="fa fa-times"></i>
+                                        @if (User.IsInRole("Administrator"))
+                                        {
+                                            <td>
+                                                <div class="form-button-action">
+                                                    <button type="button" data-bs-toggle="tooltip" title="Edit"
+                                                        class="btn btn-link btn-primary btn-lg" data-original-title="Edit Task">
+                                                        <a asp-action="EditSupplier" asp-route-id="@item.SupplierId"
+                                                            class="text-decoration-none text-primary">
+                                                            <i class="fa fa-edit"></i>
+                                                        </a>
                                                     </button>
-                                                </form>
 
-                                                <script>
-                                                    function confirmDelete(SupplierId) {
-                                                        if (confirm("Are you sure you want to delete this product category?")) {
-                                                            document.getElementById('deleteForm-' + SupplierId).submit();
+                                                    <form asp-action="DeleteSupplier" asp-controller="Supplier" method="post"
+                                                        style="display:inline;" id="deleteForm-@item.SupplierId">
+                                                        <input type="hidden" name="id" value="@item.SupplierId" />
+                                                        <button type="button" class="btn btn-link btn-danger"
+                                                            onclick="confirmDelete(@item.SupplierId)">
+                                                            <i class="fa fa-times"></i>
+                                                        </button>
+                                                    </form>
+
+                                                    <script>
+                                                        function confirmDelete(SupplierId) {
+                                                            if (confirm("Are you sure you want to delete this product category?")) {
+                                                                document.getElementById('deleteForm-' + SupplierId).submit();
+                                                            }
                                                         }
-                                                    }
-                                                </script>
-                                            </div>
-                                        </td>
+                                                    </script>
+                                                </div>
+                                            </td>
+                                        }
                                     </tr>
                                 }
                             </tbody>
                         </table>
 
-                        <a asp-action="AddSupplier" class="btn btn-primary mt-3">Add New Supplier</a>
+                        @if (User.IsInRole("Administrator"))
+                        {
+                            <a asp-action="AddSupplier" class="btn btn-primary mt-3">Add New Supplier</a>
+                        }
                     </div>
                 </div>
             </div>

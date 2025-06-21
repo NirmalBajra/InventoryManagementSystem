@@ -1,9 +1,20 @@
-﻿@model List<InventoryManagementSystem.Dtos.StockDtos.ViewStockDto>
+@using InventoryManagementSystem.Entity
+@using InventoryManagementSystem.Enums
 
 @{
+    var stockFlowData = ViewBag.StockFlowData as List<StockFlow> ?? new List<StockFlow>();
+    int totalItems = ViewBag.TotalItems ?? 0;
+    int currentPage = ViewBag.CurrentPage ?? 1;
+    int pageSize = ViewBag.PageSize ?? 10;
+    int totalPages = ViewBag.TotalPages ?? 0;
+    string filterType = ViewBag.FilterType ?? "";
+    string searchTerm = ViewBag.SearchTerm ?? "";
+    string sortBy = ViewBag.SortBy ?? "Date";
+    string sortOrder = ViewBag.SortOrder ?? "desc";
+
     ViewData["Title"] = "Stock Flow";
     ViewData["PageTitle"] = "Stock Flow";
-    ViewData["MainItem"] = "View Stock";
+    ViewData["MainItem"] = "Stock Management";
     ViewData["SubItem"] = "Stock Flow";
 }
 
@@ -11,58 +22,355 @@
     <div class="page-inner">
         @await Html.PartialAsync("breadcurm")
 
-        <div class="card mt-4">
-        <div class="card-header">
-            <h3 class="mb-0">Stock Flow</h3>
-        </div>
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title">Stock Flow</h4>
+                <p class="card-category">Track stock movements (in/out)</p>
+            </div>
 
-        <div class="card-body">
-            @if (Model != null && Model.Any())
-            {
+            <div class="card-body">
+                <!-- Simple Filter Form -->
+                <form method="get" class="row mb-3">
+                    <div class="col-md-3">
+                        <label class="form-label">Search</label>
+                        <input type="text" 
+                               name="searchTerm" 
+                               value="@searchTerm" 
+                               placeholder="Search products..." 
+                               class="form-control" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Type</label>
+                        <select name="filterType" class="form-control">
+                            <option value="">All</option>
+                            <option value="in" selected="@(filterType == "in")">Stock In</option>
+                            <option value="out" selected="@(filterType == "out")">Stock Out</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Date</label>
+                        <input type="date" 
+                               name="selectedDate" 
+                               value="@(ViewBag.SelectedDate ?? DateTime.Now.ToString("yyyy-MM-dd"))" 
+                               class="form-control" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Sort</label>
+                        <select name="sortBy" class="form-control">
+                            <option value="Date" selected="@(sortBy == "Date")">Date</option>
+                            <option value="product" selected="@(sortBy == "product")">Product</option>
+                            <option value="quantity" selected="@(sortBy == "quantity")">Quantity</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Order</label>
+                        <select name="sortOrder" class="form-control">
+                            <option value="desc" selected="@(sortOrder == "desc")">Desc</option>
+                            <option value="asc" selected="@(sortOrder == "asc")">Asc</option>
+                        </select>
+                    </div>
+                    <div class="col-md-1 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Simple Summary -->
+                <div class="row mb-3">
+                    <div class="col-md-3">
+                        <div class="card">
+                            <div class="card-body text-center">
+                                <h5 class="card-title text-primary">Total Records</h5>
+                                <h3>@totalItems</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card">
+                            <div class="card-body text-center">
+                                <h5 class="card-title text-success">Stock In</h5>
+                                <h3>@stockFlowData.Where(sf => sf.StockType == StockType.In).Sum(sf => sf.Quantity)</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card">
+                            <div class="card-body text-center">
+                                <h5 class="card-title text-danger">Stock Out</h5>
+                                <h3>@stockFlowData.Where(sf => sf.StockType == StockType.Out).Sum(sf => sf.Quantity)</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card">
+                            <div class="card-body text-center">
+                                <h5 class="card-title text-info">Total Value</h5>
+                                <h3>@stockFlowData.Sum(sf => sf.TotalCost).ToString("N2")</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stock Flow Table -->
                 <div class="table-responsive">
-                    <table class="table table-bordered table-striped">
-                        <thead class="thead-dark">
+                    <table class="table table-bordered table-striped table-hover">
+                        <thead class="table-dark">
                             <tr>
-                                <th>Image</th>
-                                <th>Product Name</th>
-                                <th>Category</th>
-                                <th>Quantity</th>
-                                <th>Available Quantity</th>
-                                <th>Unit Price</th>
+                                <th width="5%">SN</th>
+                                <th width="20%">Product Name</th>
+                                <th width="15%">Category</th>
+                                <th width="10%">Stock Type</th>
+                                <th width="10%">Quantity</th>
+                                <th width="15%">Price</th>
+                                <th width="15%">Date</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach (var item in Model)
+                            @if (!stockFlowData.Any())
                             {
                                 <tr>
-                                    <td>
-                                        @if (!string.IsNullOrEmpty(item.ImagePath))
-                                        {
-                                            <img src="~/@item.ImagePath" alt="Product Image" width="50" height="50" />
-                                        }
-                                        else
-                                        {
-                                            <img src="~/img/images/default.png" alt="No Image" width="50" height="50" />
-                                        }
+                                    <td colspan="7" class="text-center text-muted py-4">
+                                        <i class="fas fa-inbox fa-3x mb-3"></i>
+                                        <br>
+                                        <h5>No stock flow records found</h5>
+                                        <p class="mb-0">Try adjusting your filters or search criteria</p>
                                     </td>
-                                    <td>@item.ProductName</td>
-                                    <td>@item.CategoryName</td>
-                                    <td>@item.Quantity</td>
-                                    <td>@item.AvailableQuantity</td>
-                                    <td>@item.UnitPrice.ToString("C")</td>
                                 </tr>
+                            }
+                            else
+                            {
+                                int sn = ((currentPage - 1) * pageSize) + 1;
+                                foreach (var item in stockFlowData)
+                                {
+                                    <tr>
+                                        <td class="text-center">
+                                            <span class="badge bg-secondary">@sn</span>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                @if (!string.IsNullOrEmpty(item.Product?.ImagePath))
+                                                {
+                                                    <img src="@item.Product.ImagePath" 
+                                                         alt="@item.Product.ProductName" 
+                                                         class="rounded me-2" 
+                                                         style="width: 30px; height: 30px; object-fit: cover;" />
+                                                }
+                                                else
+                                                {
+                                                    <div class="bg-light rounded me-2 d-flex align-items-center justify-content-center" 
+                                                         style="width: 30px; height: 30px;">
+                                                        <i class="fas fa-box text-muted"></i>
+                                                    </div>
+                                                }
+                                                <div>
+                                                    <strong>@(item.Product?.ProductName ?? "N/A")</strong>
+                                                    @if (item.Product != null)
+                                                    {
+                                                        <br>
+                                                        <small class="text-muted">ID: @item.Product.ProductId</small>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-info">
+                                                @(item.Product?.Category?.CategoryName ?? "N/A")
+                                            </span>
+                                        </td>
+                                        <td class="text-center">
+                                            @if (item.StockType == StockType.In)
+                                            {
+                                                <span class="badge bg-success">
+                                                    <i class="fas fa-arrow-down me-1"></i>IN
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-danger">
+                                                    <i class="fas fa-arrow-up me-1"></i>OUT
+                                                </span>
+                                            }
+                                        </td>
+                                        <td class="text-center">
+                                            <strong class="@(item.StockType == StockType.In ? "text-success" : "text-danger")">
+                                                @(item.StockType == StockType.In ? "+" : "-")@item.Quantity
+                                            </strong>
+                                        </td>
+                                        <td>
+                                            <div>
+                                                <strong class="text-primary">@item.UnitPrice.ToString("N2")</strong>
+                                                <br>
+                                                <small class="text-muted">Total: @item.TotalCost.ToString("N2")</small>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div>
+                                                <i class="fas fa-calendar-alt text-muted me-1"></i>
+                                                <strong>@item.CreatedAt.ToString("MMM dd, yyyy")</strong>
+                                                <br>
+                                                <small class="text-muted">@item.CreatedAt.ToString("HH:mm")</small>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    sn++;
+                                }
                             }
                         </tbody>
                     </table>
                 </div>
-            }
-            else
-            {
-                <div class="alert alert-info">
-                    No stock data available.
+
+                <!-- Pagination -->
+                @if (totalPages > 1)
+                {
+                    <nav aria-label="Stock Flow pagination" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            @if (currentPage > 1)
+                            {
+                                <li class="page-item">
+                                    <a class="page-link" href="@Url.Action("StockFlow", new {
+                                        page = currentPage - 1,
+                                        pageSize = pageSize,
+                                        filterType = filterType,
+                                        searchTerm = searchTerm,
+                                        sortBy = sortBy,
+                                        sortOrder = sortOrder,
+                                        selectedDate = ViewBag.SelectedDate
+                                    })">
+                                        <i class="fas fa-chevron-left"></i> Previous
+                                    </a>
+                                </li>
+                            }
+
+                            @{
+                                int startPage = Math.Max(1, currentPage - 2);
+                                int endPage = Math.Min(totalPages, currentPage + 2);
+                            }
+
+                            @if (startPage > 1)
+                            {
+                                <li class="page-item">
+                                    <a class="page-link" href="@Url.Action("StockFlow", new {
+                                        page = 1,
+                                        pageSize = pageSize,
+                                        filterType = filterType,
+                                        searchTerm = searchTerm,
+                                        sortBy = sortBy,
+                                        sortOrder = sortOrder,
+                                        selectedDate = ViewBag.SelectedDate
+                                    })">1</a>
+                                </li>
+                                @if (startPage > 2)
+                                {
+                                    <li class="page-item disabled">
+                                        <span class="page-link">...</span>
+                                    </li>
+                                }
+                            }
+
+                            @for (int i = startPage; i <= endPage; i++)
+                            {
+                                <li class="page-item @(i == currentPage ? "active" : "")">
+                                    <a class="page-link" href="@Url.Action("StockFlow", new {
+                                        page = i,
+                                        pageSize = pageSize,
+                                        filterType = filterType,
+                                        searchTerm = searchTerm,
+                                        sortBy = sortBy,
+                                        sortOrder = sortOrder,
+                                        selectedDate = ViewBag.SelectedDate
+                                    })">@i</a>
+                                </li>
+                            }
+
+                            @if (endPage < totalPages)
+                            {
+                                @if (endPage < totalPages - 1)
+                                {
+                                    <li class="page-item disabled">
+                                        <span class="page-link">...</span>
+                                    </li>
+                                }
+                                <li class="page-item">
+                                    <a class="page-link" href="@Url.Action("StockFlow", new {
+                                        page = totalPages,
+                                        pageSize = pageSize,
+                                        filterType = filterType,
+                                        searchTerm = searchTerm,
+                                        sortBy = sortBy,
+                                        sortOrder = sortOrder,
+                                        selectedDate = ViewBag.SelectedDate
+                                    })">@totalPages</a>
+                                </li>
+                            }
+
+                            @if (currentPage < totalPages)
+                            {
+                                <li class="page-item">
+                                    <a class="page-link" href="@Url.Action("StockFlow", new {
+                                        page = currentPage + 1,
+                                        pageSize = pageSize,
+                                        filterType = filterType,
+                                        searchTerm = searchTerm,
+                                        sortBy = sortBy,
+                                        sortOrder = sortOrder,
+                                        selectedDate = ViewBag.SelectedDate
+                                    })">
+                                        Next <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                    </nav>
+                }
+
+                <!-- Page Size Selector -->
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center">
+                            <label class="me-2">Show:</label>
+                            <select class="form-select form-select-sm" style="width: auto;" onchange="changePageSize(this.value)">
+                                <option value="10" selected="@(pageSize == 10 ? "selected" : null)">10</option>
+                                <option value="25" selected="@(pageSize == 25 ? "selected" : null)">25</option>
+                                <option value="50" selected="@(pageSize == 50 ? "selected" : null)">50</option>
+                                <option value="100" selected="@(pageSize == 100 ? "selected" : null)">100</option>
+                            </select>
+                            <span class="ms-2">records per page</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <small class="text-muted">
+                            Showing @(((currentPage - 1) * pageSize) + 1) to @Math.Min(currentPage * pageSize, totalItems) of @totalItems entries
+                        </small>
+                    </div>
                 </div>
-            }
+            </div>
         </div>
     </div>
 </div>
-</div>
+
+<script>
+function changePageSize(size) {
+    const url = new URL(window.location);
+    url.searchParams.set('pageSize', size);
+    url.searchParams.set('page', '1'); // Reset to first page when changing page size
+    
+    // Preserve other parameters
+    const selectedDate = document.querySelector('input[name="selectedDate"]').value;
+    if (selectedDate) {
+        url.searchParams.set('selectedDate', selectedDate);
+    }
+    
+    window.location.href = url.toString();
+}
+
+// Auto-submit form when date changes
+document.addEventListener('DOMContentLoaded', function() {
+    const dateInput = document.querySelector('input[name="selectedDate"]');
+    if (dateInput) {
+        dateInput.addEventListener('change', function() {
+            this.closest('form').submit();
+        });
+    }
+});
+</script> 

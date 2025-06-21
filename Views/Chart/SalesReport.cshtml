@@ -1,21 +1,241 @@
-﻿@{
+﻿@using System.Text.Json
+@using System.Globalization
+@{
     ViewData["Title"] = "Sales Report";
     ViewData["PageTitle"] = "Sales Report";
-    ViewData["MainItem"] = "Charts";
+    ViewData["MainItem"] = "Chart";
     ViewData["SubItem"] = "Sales Report";
+    var monthlySales = ViewBag.MonthlySales as IEnumerable<dynamic>;
+    var salesLast6Months = ViewBag.SalesLast6Months as IEnumerable<dynamic>;
+    var topProducts = ViewBag.TopProducts as IEnumerable<dynamic>;
+    var startDate = ViewBag.StartDate as DateTime?;
+    var endDate = ViewBag.EndDate as DateTime?;
 }
 
 <div class="container">
     <div class="page-inner">
-        @await Html.PartialAsync("breadcurm")
-        <div class="card">
-            <div class="card-header">
-                <h3>Sales Report</h3>
-            </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">Sales Report</h4>
+                    </div>
+                    <div class="card-body">
+                        <!-- Date Filter Form -->
+                        <form method="get" class="mb-4">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <label for="startDate" class="form-label">Start Date</label>
+                                    <input type="date" id="startDate" name="startDate" class="form-control" value="@ViewBag.StartDate" />
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="endDate" class="form-label">End Date</label>
+                                    <input type="date" id="endDate" name="endDate" class="form-control" value="@ViewBag.EndDate" />
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">&nbsp;</label>
+                                    <div>
+                                        <button type="submit" class="btn btn-primary">Filter</button>
+                                        <a href="@Url.Action("SalesReport")" class="btn btn-secondary">Reset</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
 
-            <div class="card-body">
-                
+                        <!-- Summary Statistics -->
+                        @if (ViewBag.SalesData != null && ((List<InventoryManagementSystem.Entity.Sales>)ViewBag.SalesData).Any())
+                        {
+                            var sales = (List<InventoryManagementSystem.Entity.Sales>)ViewBag.SalesData;
+                            var totalRevenue = sales.Sum(s => s.TotalAmount);
+                            var totalSales = sales.Count;
+                            var averageOrderValue = totalSales > 0 ? totalRevenue / totalSales : 0;
+
+                            <div class="row mb-4">
+                                <div class="col-md-4">
+                                    <div class="card bg-primary text-white">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Total Sales</h5>
+                                            <h3 class="mb-0">@totalSales</h3>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card bg-success text-white">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Total Revenue</h5>
+                                            <h3 class="mb-0">@totalRevenue.ToString("N2")</h3>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card bg-info text-white">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Average Order</h5>
+                                            <h3 class="mb-0">@averageOrderValue.ToString("N2")</h3>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+
+                        <!-- Sales Data Table -->
+                        @if (ViewBag.SalesData != null && ((List<InventoryManagementSystem.Entity.Sales>)ViewBag.SalesData).Any())
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-striped table-bordered">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th>Sale ID</th>
+                                            <th>Date</th>
+                                            <th>Customer</th>
+                                            <th>Items</th>
+                                            <th>Total Amount</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var sale in (List<InventoryManagementSystem.Entity.Sales>)ViewBag.SalesData)
+                                        {
+                                            <tr>
+                                                <td>@sale.SalesId</td>
+                                                <td>@sale.SalesDate.ToString("yyyy-MM-dd HH:mm")</td>
+                                                <td>@(sale.CustomerName ?? "Walk-in Customer")</td>
+                                                <td>
+                                                    @if (sale.SalesDetails != null && sale.SalesDetails.Any())
+                                                    {
+                                                        <ul class="list-unstyled mb-0">
+                                                            @foreach (var detail in sale.SalesDetails.Take(3))
+                                                            {
+                                                                <li>@(detail.Product?.ProductName ?? "N/A") - @detail.Quantity x @detail.UnitPrice.ToString("N2")</li>
+                                                            }
+                                                            @if (sale.SalesDetails.Count > 3)
+                                                            {
+                                                                <li><em>... and @(sale.SalesDetails.Count - 3) more items</em></li>
+                                                            }
+                                                        </ul>
+                                                    }
+                                                </td>
+                                                <td>@sale.TotalAmount.ToString("N2")</td>
+                                                <td>
+                                                    <a href="@Url.Action("Details", "Sales", new { id = sale.SalesId })" class="btn btn-sm btn-info">View Details</a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Pagination -->
+                            @if (ViewBag.TotalPages > 1)
+                            {
+                                <nav aria-label="Sales pagination">
+                                    <ul class="pagination justify-content-center">
+                                        @{
+                                            var currentPage = ViewBag.CurrentPage;
+                                            var totalPages = ViewBag.TotalPages;
+                                            var startPage = Math.Max(1, currentPage - 2);
+                                            var endPage = Math.Min(totalPages, currentPage + 2);
+                                        }
+
+                                        @if (currentPage > 1)
+                                        {
+                                            <li class="page-item">
+                                                <a class="page-link" href="@Url.Action("SalesReport", new { 
+                                                    startDate = ViewBag.StartDate, 
+                                                    endDate = ViewBag.EndDate, 
+                                                    pageNumber = currentPage - 1, 
+                                                    pageSize = ViewBag.PageSize 
+                                                })">Previous</a>
+                                            </li>
+                                        }
+
+                                        @for (int i = startPage; i <= endPage; i++)
+                                        {
+                                            <li class="page-item @(i == currentPage ? "active" : "")">
+                                                <a class="page-link" href="@Url.Action("SalesReport", new { 
+                                                    startDate = ViewBag.StartDate, 
+                                                    endDate = ViewBag.EndDate, 
+                                                    pageNumber = i, 
+                                                    pageSize = ViewBag.PageSize 
+                                                })">@i</a>
+                                            </li>
+                                        }
+
+                                        @if (currentPage < totalPages)
+                                        {
+                                            <li class="page-item">
+                                                <a class="page-link" href="@Url.Action("SalesReport", new { 
+                                                    startDate = ViewBag.StartDate, 
+                                                    endDate = ViewBag.EndDate, 
+                                                    pageNumber = currentPage + 1, 
+                                                    pageSize = ViewBag.PageSize 
+                                                })">Next</a>
+                                            </li>
+                                        }
+                                    </ul>
+                                </nav>
+                            }
+
+                            <!-- Results Summary -->
+                            <div class="text-center mt-3">
+                                <small class="text-muted">
+                                    Showing @(((ViewBag.CurrentPage - 1) * ViewBag.PageSize) + 1) to @Math.Min(ViewBag.CurrentPage * ViewBag.PageSize, ViewBag.TotalCount) of @ViewBag.TotalCount sales
+                                </small>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="alert alert-info text-center">
+                                <h5>No Sales Data Found</h5>
+                                <p>There are no sales in the selected date range. Try adjusting the date filter or check if sales have been created.</p>
+                            </div>
+                        }
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Prepare data for the chart
+        var months = [];
+        var totals = [];
+        @if (salesLast6Months != null && salesLast6Months.Any())
+        {
+            <text>
+            months = @Html.Raw(JsonSerializer.Serialize(salesLast6Months.Select(m => m.Month + "-" + m.Year).ToList()));
+            totals = @Html.Raw(JsonSerializer.Serialize(salesLast6Months.Select(m => m.TotalRevenue).ToList()));
+            </text>
+        }
+        else
+        {
+            <text>
+            months = [];
+            totals = [];
+            </text>
+        }
+        const ctx = document.getElementById('salesChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: months,
+                datasets: [{
+                    label: 'Total Revenue',
+                    data: totals,
+                    backgroundColor: 'rgba(255, 99, 132, 0.7)'
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: true }
+                },
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+    </script>
+}

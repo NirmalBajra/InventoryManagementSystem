@@ -29,10 +29,13 @@
                         {
                             <div class="alert alert-success">@TempData["SuccessMessage"]</div>
                         }
-                        @if (!ViewData.ModelState.IsValid && ViewData.ModelState[string.Empty] != null)
+                        @{
+                            var modelStateEntry = ViewData.ModelState[string.Empty];
+                        }
+                        @if (!ViewData.ModelState.IsValid && modelStateEntry?.Errors != null && modelStateEntry.Errors.Any())
                         {
                             <div class="alert alert-danger">
-                                @foreach (var error in ViewData.ModelState[string.Empty].Errors)
+                                @foreach (var error in modelStateEntry.Errors)
                                 {
                                     <p class="mb-0">@error.ErrorMessage</p>
                                 }

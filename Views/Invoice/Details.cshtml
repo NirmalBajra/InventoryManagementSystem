@@ -1,0 +1,160 @@
+@model InventoryManagementSystem.Entity.Invoice
+@{
+    ViewData["Title"] = $"Invoice {Model.InvoiceNumber}";
+    ViewData["PageTitle"] = $"Invoice {Model.InvoiceNumber}";
+    ViewData["MainItem"] = "Invoice";
+    ViewData["SubItem"] = "Details";
+}
+
+<div class="container">
+    <div class="page-inner">
+        @await Html.PartialAsync("breadcurm")
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="d-flex align-items-center">
+                            <h4 class="card-title">Invoice Details</h4>
+                            <div class="ml-auto">
+                                <a href="@Url.Action("Print", new { id = Model.InvoiceId })" class="btn btn-secondary btn-sm" target="_blank">
+                                    <i class="fa fa-print"></i> Print
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        @if (TempData["SuccessMessage"] != null)
+                        {
+                            <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+                        }
+
+                        @if (TempData["ErrorMessage"] != null)
+                        {
+                            <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+                        }
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5>Invoice Information</h5>
+                                <table class="table table-borderless">
+                                    <tr>
+                                        <td><strong>Invoice Number:</strong></td>
+                                        <td>@Model.InvoiceNumber</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Invoice Date:</strong></td>
+                                        <td>@Model.InvoiceDate.ToString("MMMM dd, yyyy")</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Due Date:</strong></td>
+                                        <td>@Model.DueDate.ToString("MMMM dd, yyyy")</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Payment Status:</strong></td>
+                                        <td>
+                                            @if (Model.PaymentStatus == "Paid")
+                                            {
+                                                <span class="badge badge-success">Paid</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge badge-warning">Pending</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="col-md-6">
+                                <h5>Customer Information</h5>
+                                <table class="table table-borderless">
+                                    <tr>
+                                        <td><strong>Customer Name:</strong></td>
+                                        <td>@Model.CustomerName</td>
+                                    </tr>
+                                    @if (!string.IsNullOrEmpty(Model.CustomerAddress))
+                                    {
+                                        <tr>
+                                            <td><strong>Address:</strong></td>
+                                            <td>@Model.CustomerAddress</td>
+                                        </tr>
+                                    }
+                                    @if (!string.IsNullOrEmpty(Model.CustomerPhone))
+                                    {
+                                        <tr>
+                                            <td><strong>Phone:</strong></td>
+                                            <td>@Model.CustomerPhone</td>
+                                        </tr>
+                                    }
+                                </table>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <h5>Items</h5>
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Quantity</th>
+                                        <th>Unit Price</th>
+                                        <th>Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var detail in Model.Sales.SalesDetails)
+                                    {
+                                        <tr>
+                                            <td>@detail.Product.ProductName</td>
+                                            <td>@detail.Quantity</td>
+                                            <td>$@detail.UnitPrice.ToString("F2")</td>
+                                            <td>$@detail.TotalPrice.ToString("F2")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 offset-md-6">
+                                <table class="table table-borderless">
+                                    <tr>
+                                        <td><strong>Subtotal:</strong></td>
+                                        <td class="text-right">$@Model.SubTotal.ToString("F2")</td>
+                                    </tr>
+                                    @if (Model.TaxAmount > 0)
+                                    {
+                                        <tr>
+                                            <td><strong>Tax:</strong></td>
+                                            <td class="text-right">$@Model.TaxAmount.ToString("F2")</td>
+                                        </tr>
+                                    }
+                                    @if (Model.DiscountAmount > 0)
+                                    {
+                                        <tr>
+                                            <td><strong>Discount:</strong></td>
+                                            <td class="text-right text-success">-$@Model.DiscountAmount.ToString("F2")</td>
+                                        </tr>
+                                    }
+                                    <tr>
+                                        <td><strong>Total:</strong></td>
+                                        <td class="text-right"><strong>$@Model.TotalAmount.ToString("F2")</strong></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(Model.Notes))
+                        {
+                            <hr>
+                            <h5>Notes</h5>
+                            <p>@Model.Notes</p>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> 

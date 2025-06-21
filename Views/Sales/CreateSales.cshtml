@@ -1,21 +1,293 @@
-﻿@{
-    ViewData["Title"] = "Create Sales";
-    ViewData["PageTitle"] = "Create Sales";
+﻿@model InventoryManagementSystem.ViewModels.Sales.SalesVm
+
+@{
+    ViewData["Title"] = "Create Sale";
+    ViewData["PageTitle"] = "Create Sale";
     ViewData["MainItem"] = "Sales";
-    ViewData["SubItem"] = "Create Sales";
+    ViewData["SubItem"] = "Create Sale";
 }
 
 <div class="container">
     <div class="page-inner">
         @await Html.PartialAsync("breadcurm")
+
         <div class="card">
             <div class="card-header">
-                <h3>Create Sales</h3>
+                <h3 class="mb-0">Create New Sale</h3>
             </div>
 
             <div class="card-body">
-                
+                <form asp-action="CreateSales" method="post" id="salesForm">
+                    @Html.ValidationSummary(false, "", new { @class = "text-danger" })
+                    <div class="row">
+                        <!-- Customer Information -->
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0">Customer Information</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label asp-for="CustomerName" class="form-label">Customer Name *</label>
+                                        <input asp-for="CustomerName" class="form-control" placeholder="Enter customer name" required />
+                                        <span asp-validation-for="CustomerName" class="text-danger"></span>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label asp-for="SalesDate" class="form-label">Sale Date *</label>
+                                        <input asp-for="SalesDate" type="date" class="form-control" readonly />
+                                        <span asp-validation-for="SalesDate" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sale Summary -->
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0">Sale Summary</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <label class="form-label">Total Items</label>
+                                            <div class="h4 text-primary" id="totalItems">0</div>
+                                        </div>
+                                        <div class="col-6 text-end">
+                                            <label class="form-label">Total Amount</label>
+                                            <div class="h4 text-success" id="totalAmount">0.00</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Products Section -->
+                    <div class="card mt-4">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Products</h5>
+                            <button type="button" class="btn btn-primary btn-sm" onclick="addProductRow()">
+                                <i class="fas fa-plus"></i> Add Product
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="productsTable">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>Product</th>
+                                            <th>Available Stock</th>
+                                            <th>Quantity</th>
+                                            <th>Unit Price</th>
+                                            <th>Total</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="productsTableBody">
+                                        <!-- Product rows will be added here dynamically -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="card mt-4">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <a href="@Url.Action("Index")" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left"></i> Back to Sales
+                                </a>
+                                <div>
+                                    <button type="button" class="btn btn-warning me-2" onclick="clearForm()">
+                                        <i class="fas fa-undo"></i> Clear
+                                    </button>
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="fas fa-save"></i> Create Sale
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        let productRowIndex = 0;
+        const products = @Html.Raw(Json.Serialize(Model.Products));
+
+        // Initialize the form
+        document.addEventListener('DOMContentLoaded', function() {
+            addProductRow();
+            updateSummary();
+        });
+
+        function addProductRow() {
+            const tbody = document.getElementById('productsTableBody');
+            const row = document.createElement('tr');
+            row.id = `productRow_${productRowIndex}`;
+            
+            row.innerHTML = `
+                <td>
+                    <select name="SalesDetails[${productRowIndex}].ProductId" class="form-control product-select" onchange="onProductChange(${productRowIndex})" required>
+                        <option value="">Select Product</option>
+                        ${products.map(p => `<option value="${p.productId}" data-price="${p.unitPrice}" data-stock="${p.availableQuantity}">${p.productName}</option>`).join('')}
+                    </select>
+                </td>
+                <td>
+                    <span class="available-stock" id="stock_${productRowIndex}">-</span>
+                </td>
+                <td>
+                    <input type="number" name="SalesDetails[${productRowIndex}].Quantity" class="form-control quantity-input" min="1" onchange="onQuantityChange(${productRowIndex})" onkeyup="onQuantityChange(${productRowIndex})" required />
+                </td>
+                <td>
+                    <input type="number" name="SalesDetails[${productRowIndex}].UnitPrice" class="form-control price-input" min="0.01" step="0.01" onchange="onPriceChange(${productRowIndex})" onkeyup="onPriceChange(${productRowIndex})" required />
+                </td>
+                <td>
+                    <label class="form-label">Total</label>
+                    <span class="row-total" id="total_${productRowIndex}">0.00</span>
+                </td>
+                <td>
+                    <button type="button" class="btn btn-danger btn-sm" onclick="removeProductRow(${productRowIndex})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            `;
+            
+            tbody.appendChild(row);
+            productRowIndex++;
+        }
+
+        function removeProductRow(index) {
+            const row = document.getElementById(`productRow_${index}`);
+            if (row) {
+                row.remove();
+                updateSummary();
+            }
+        }
+
+        function onProductChange(index) {
+            const select = document.querySelector(`#productRow_${index} .product-select`);
+            const selectedOption = select.options[select.selectedIndex];
+            const priceInput = document.querySelector(`#productRow_${index} .price-input`);
+            const stockSpan = document.getElementById(`stock_${index}`);
+            
+            if (selectedOption.value) {
+                const price = selectedOption.getAttribute('data-price');
+                const stock = selectedOption.getAttribute('data-stock');
+                
+                priceInput.value = price;
+                stockSpan.textContent = stock;
+                stockSpan.className = stock > 10 ? 'text-success' : stock > 0 ? 'text-warning' : 'text-danger';
+            } else {
+                priceInput.value = '';
+                stockSpan.textContent = '-';
+                stockSpan.className = '';
+            }
+            
+            onQuantityChange(index);
+        }
+
+        function onQuantityChange(index) {
+            const quantityInput = document.querySelector(`#productRow_${index} .quantity-input`);
+            const priceInput = document.querySelector(`#productRow_${index} .price-input`);
+            const totalSpan = document.getElementById(`total_${index}`);
+            
+            const quantity = parseFloat(quantityInput.value) || 0;
+            const price = parseFloat(priceInput.value) || 0;
+            const total = quantity * price;
+            
+            totalSpan.textContent = total.toFixed(2);
+            updateGrandTotal();
+        }
+
+        function onPriceChange(index) {
+            onQuantityChange(index);
+        }
+
+        function updateSummary() {
+            let totalItems = 0;
+            let totalAmount = 0;
+            
+            const quantityInputs = document.querySelectorAll('.quantity-input');
+            const totalSpans = document.querySelectorAll('.row-total');
+            
+            quantityInputs.forEach((input, index) => {
+                const quantity = parseFloat(input.value) || 0;
+                totalItems += quantity;
+                
+                if (totalSpans[index]) {
+                    const totalText = totalSpans[index].textContent;
+                    const amount = parseFloat(totalText) || 0;
+                    totalAmount += amount;
+                }
+            });
+            
+            document.getElementById('totalItems').textContent = totalItems;
+            document.getElementById('totalAmount').textContent = totalAmount.toFixed(2);
+        }
+
+        function updateGrandTotal() {
+            let totalAmount = 0;
+            const totalElements = document.querySelectorAll('.row-total');
+            totalElements.forEach(el => {
+                const totalText = el.textContent;
+                const amount = parseFloat(totalText) || 0;
+                totalAmount += amount;
+            });
+
+            document.getElementById('totalAmount').textContent = totalAmount.toFixed(2);
+        }
+
+        function clearForm() {
+            if (confirm('Are you sure you want to clear the form?')) {
+                document.getElementById('salesForm').reset();
+                document.getElementById('productsTableBody').innerHTML = '';
+                productRowIndex = 0;
+                addProductRow();
+                updateSummary();
+            }
+        }
+
+        // Form validation
+        document.getElementById('salesForm').addEventListener('submit', function(e) {
+            const customerName = document.querySelector('input[name="CustomerName"]').value.trim();
+            const salesDate = document.querySelector('input[name="SalesDate"]').value;
+            const productRows = document.querySelectorAll('#productsTableBody tr');
+            
+            if (!customerName) {
+                alert('Please enter customer name');
+                e.preventDefault();
+                return;
+            }
+            
+            if (!salesDate) {
+                alert('Please select sale date');
+                e.preventDefault();
+                return;
+            }
+            
+            let hasValidProducts = false;
+            productRows.forEach(row => {
+                const productId = row.querySelector('.product-select').value;
+                const quantity = row.querySelector('.quantity-input').value;
+                const price = row.querySelector('.price-input').value;
+                
+                if (productId && quantity && price) {
+                    hasValidProducts = true;
+                }
+            });
+            
+            if (!hasValidProducts) {
+                alert('Please add at least one product to the sale');
+                e.preventDefault();
+                return;
+            }
+        });
+    </script>
+}

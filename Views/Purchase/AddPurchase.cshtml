@@ -9,66 +9,186 @@
 
 <div class="container">
     <div class="page-inner">
-    @await Html.PartialAsync("breadcurm")
-
+        @await Html.PartialAsync("breadcurm")
         <div class="card">
             <div class="card-header">
-                <h3>Add New Purchase</h3>
+                <h3 class="card-title">Create New Purchase</h3>
             </div>
             <div class="card-body">
-                <form asp-action="AddPurchase" asp-controller="Purchase" method="post">
-                    <div class="form-group">
-                        <label>Supplier</label>
-                        <select asp-for="SupplierId" class="form-control" asp-items="ViewBag.Suppliers"></select>
+                <form asp-action="AddPurchase" asp-controller="Purchase" method="post" id="addPurchaseForm">
+                    @Html.ValidationSummary(false, "", new { @class = "text-danger" })
+
+                    <!-- Purchase Header -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <label asp-for="SupplierId" class="form-label">Supplier *</label>
+                            <select asp-for="SupplierId" class="form-select" asp-items="ViewBag.Suppliers" required>
+                                <option value="">-- Select a Supplier --</option>
+                            </select>
+                            <span asp-validation-for="SupplierId" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="PurchaseDate" class="form-label">Purchase Date</label>
+                            <input type="text" class="form-control" value="@(Model.PurchaseDate?.ToString("yyyy-MM-dd HH:mm:ss") ?? DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss"))" readonly />
+                            <input type="hidden" asp-for="PurchaseDate" />
+                        </div>
                     </div>
 
-                    <h4>Purchase Items</h4>
-                    <div id="purchaseItems">
-                        <!-- Repeat for each detail -->
+                    <!-- Purchase Items -->
+                    <h4 class="mt-4">Purchase Items</h4>
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="purchaseItemsTable">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th style="width: 25%;">Product *</th>
+                                    <th style="width: 25%;">Category *</th>
+                                    <th style="width: 15%;">Quantity *</th>
+                                    <th style="width: 15%;">Unit Price *</th>
+                                    <th style="width: 15%;">Total</th>
+                                    <th style="width: 5%;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="purchaseItems">
+                                <!-- Dynamic rows will be added here -->
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="4" class="text-end"><strong>Grand Total:</strong></td>
+                                    <td colspan="2"><strong id="grandTotal">0.00</strong></td>
+                                </tr>
+                            </tfoot>
+                        </table>
                     </div>
+                    <button type="button" onclick="addItem()" class="btn btn-secondary mt-2">
+                        <i class="fas fa-plus"></i> Add Another Item
+                    </button>
 
-                    <button type="button" onclick="addItem()" class="btn btn-secondary">Add Item</button>
-                    <br /><br />
-                    <button type="submit" class="btn btn-primary">Submit</button>
+                    <!-- Form Actions -->
+                    <div class="d-flex justify-content-end mt-4">
+                        <a asp-action="ViewPurchases" class="btn btn-outline-secondary me-2">Cancel</a>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-save"></i> Save Purchase
+                        </button>
+                    </div>
                 </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Category Modal -->
+<div class="modal fade" id="addCategoryModal" tabindex="-1" aria-labelledby="addCategoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addCategoryModalLabel">Add New Product Category</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addCategoryForm">
+                    <div class="mb-3">
+                        <label class="form-label">Category Name</label>
+                        <input type="text" class="form-control" name="CategoryName" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <input type="text" class="form-control" name="Description" />
+                    </div>
+                    <div class="d-flex justify-content-end">
+                        <button type="submit" class="btn btn-primary">Add Category</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 
 @section Scripts {
     <script>
-        let products = @Html.Raw(Json.Serialize(ViewBag.Products));
-        let categories = @Html.Raw(Json.Serialize(ViewBag.Categories));
-        let index = 0;
+        let products = @Html.Raw(Json.Serialize(new SelectList(ViewBag.Products, "Value", "Text")));
+        let categories = @Html.Raw(Json.Serialize(new SelectList(ViewBag.Categories, "Value", "Text")));
+        let itemIndex = 0;
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Add one item row by default
+            if (document.getElementById('purchaseItems').rows.length === 0) {
+                addItem();
+            }
+        });
 
         function addItem() {
             const productOptions = products.map(p => `<option value="${p.value}">${p.text}</option>`).join('');
             const categoryOptions = categories.map(c => `<option value="${c.value}">${c.text}</option>`).join('');
 
-            const html = `
-                <div class="purchase-item border p-3 mb-2">
-                    <div class="form-group">
-                        <label>Product</label>
-                        <select name="PurchaseDetails[${index}].ProductId" class="form-control">
-                            ${productOptions}
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Category</label>
-                        <select name="PurchaseDetails[${index}].CategoryId" class="form-control">
+            const tableBody = document.getElementById('purchaseItems');
+            const newRow = tableBody.insertRow();
+            newRow.id = `itemRow_${itemIndex}`;
+
+            newRow.innerHTML = `
+                <td>
+                    <select name="PurchaseDetails[${itemIndex}].ProductId" class="form-select product-select" required>
+                        <option value="">-- Select Product --</option>
+                        ${productOptions}
+                    </select>
+                </td>
+                <td>
+                    <div class="input-group">
+                        <select name="PurchaseDetails[${itemIndex}].CategoryId" class="form-select category-select" required>
+                            <option value="">-- Select Category --</option>
                             ${categoryOptions}
                         </select>
                     </div>
-                    <div class="form-group">
-                        <label>Quantity</label>
-                        <input name="PurchaseDetails[${index}].Quantity" class="form-control" />
-                    </div>
-                    <div class="form-group">
-                        <label>Unit Price</label>
-                        <input name="PurchaseDetails[${index}].UnitPrice" class="form-control" />
-                    </div>
-                </div>`;
-            
-            $('#purchaseItems').append(html);
-            index++;
+                </td>
+                <td>
+                    <input name="PurchaseDetails[${itemIndex}].Quantity" type="number" min="1" value="1" class="form-control quantity-input" required oninput="updateRowTotal(${itemIndex})" />
+                </td>
+                <td>
+                    <input name="PurchaseDetails[${itemIndex}].UnitPrice" type="number" min="0.01" step="0.01" value="0.00" class="form-control price-input" required oninput="updateRowTotal(${itemIndex})" />
+                </td>
+                <td>
+                    <span class="row-total fw-bold">0.00</span>
+                </td>
+                <td>
+                    <button type="button" class="btn btn-danger btn-sm" onclick="removeItem(${itemIndex})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>`;
+            itemIndex++;
         }
+
+        function removeItem(index) {
+            document.getElementById(`itemRow_${index}`).remove();
+            updateGrandTotal();
+        }
+
+        function updateRowTotal(index) {
+            const row = document.getElementById(`itemRow_${index}`);
+            const quantity = parseFloat(row.querySelector('.quantity-input').value) || 0;
+            const price = parseFloat(row.querySelector('.price-input').value) || 0;
+            const total = quantity * price;
+            row.querySelector('.row-total').textContent = `${total.toFixed(2)}`;
+            updateGrandTotal();
+        }
+
+        function updateGrandTotal() {
+            let grandTotal = 0;
+            document.querySelectorAll('#purchaseItems .row-total').forEach(totalSpan => {
+                grandTotal += parseFloat(totalSpan.textContent) || 0;
+            });
+            document.getElementById('grandTotal').textContent = `${grandTotal.toFixed(2)}`;
+        }
+
+        // Placeholder for AJAX form submission for Category
+        $(document).ready(function() {
+            $('#addCategoryForm').on('submit', function(e) {
+                e.preventDefault();
+                // TODO: AJAX call to add category, then update dropdown
+                $('#addCategoryModal').modal('hide');
+            });
+        });
     </script>
+}
+
+
 }
 

@@ -8,6 +8,7 @@ public interface IProductServices
 {
     Task AddProduct(ProductCreateVm vm);
     Task<List<ProductVm>> GetAllProduct();
+    Task<List<ProductVm>> GetAllProductsAsync();
     Task<List<ProductVm>> GetProductByName(string name);
     Task UpdateProduct(ProductUpdateVm vm);
     Task DeleteProduct(int id);

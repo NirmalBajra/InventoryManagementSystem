@@ -11,4 +11,7 @@ public class ProductVm
     public string ImagePath { get; set; }
 
     public int CategoryId { get; set; }
+
+    public int AvailableQuantity { get; set; }
+    public decimal UnitPrice { get; set; }
 }

@@ -51,34 +51,64 @@ public class ProductServices : IProductServices
     //Get all Products
     public async Task<List<ProductVm>> GetAllProduct()
     {
-        return await dbContext.Products
+        var products = await dbContext.Products
             .Include(p => p.Category)
-            .Select(p => new ProductVm
+            .ToListAsync();
+        var productVms = new List<ProductVm>();
+        foreach (var p in products)
+        {
+            var latestStock = dbContext.Stocks
+                .Where(s => s.ProductId == p.ProductId)
+                .OrderByDescending(s => s.CreatedAt)
+                .FirstOrDefault();
+            productVms.Add(new ProductVm
             {
                 ProductId = p.ProductId,
                 ProductName = p.ProductName,
                 Description = p.Description,
                 CategoryName = p.Category.CategoryName,
                 ImagePath = string.IsNullOrEmpty(p.ImagePath) ? "images/default.png" : p.ImagePath,
-                CategoryId = p.CategoryId
-            }).ToListAsync();
+                CategoryId = p.CategoryId,
+                AvailableQuantity = latestStock?.AvailableQuantity ?? 0,
+                UnitPrice = latestStock?.UnitPrice ?? 0
+            });
+        }
+        return productVms;
+    }
+
+    //Get all Products Async (alias for GetAllProduct)
+    public async Task<List<ProductVm>> GetAllProductsAsync()
+    {
+        return await GetAllProduct();
     }
 
     //Get Product By name
     public async Task<List<ProductVm>> GetProductByName(string name)
     {
-        return await dbContext.Products
-        .Include(p => p.Category)
-        .Select(p => new ProductVm
+        var products = await dbContext.Products
+            .Include(p => p.Category)
+            .Where(p => p.ProductName.Contains(name))
+            .ToListAsync();
+        var productVms = new List<ProductVm>();
+        foreach (var p in products)
         {
-            ProductId = p.ProductId,
-            ProductName = p.ProductName,
-            Description = p.Description,
-            CategoryName = p.Category.CategoryName,   // Mapping from Product to ProductVm
-            ImagePath = p.ImagePath ?? "images/default.png",  // Default image if no image is provided
-            CategoryId = p.CategoryId
-        })
-        .ToListAsync();
+            var latestStock = dbContext.Stocks
+                .Where(s => s.ProductId == p.ProductId)
+                .OrderByDescending(s => s.CreatedAt)
+                .FirstOrDefault();
+            productVms.Add(new ProductVm
+            {
+                ProductId = p.ProductId,
+                ProductName = p.ProductName,
+                Description = p.Description,
+                CategoryName = p.Category.CategoryName,
+                ImagePath = string.IsNullOrEmpty(p.ImagePath) ? "images/default.png" : p.ImagePath,
+                CategoryId = p.CategoryId,
+                AvailableQuantity = latestStock?.AvailableQuantity ?? 0,
+                UnitPrice = latestStock?.UnitPrice ?? 0
+            });
+        }
+        return productVms;
     }
 
     //Get Product By Id

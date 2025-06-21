@@ -1,0 +1,188 @@
+@model InventoryManagementSystem.Entity.Invoice
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Invoice @Model.InvoiceNumber</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: white;
+        }
+        .invoice-header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 20px;
+        }
+        .invoice-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .invoice-number {
+            font-size: 18px;
+            color: #666;
+        }
+        .invoice-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+        }
+        .customer-info, .invoice-details {
+            flex: 1;
+        }
+        .customer-info h3, .invoice-details h3 {
+            margin-top: 0;
+            color: #333;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+        }
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+        .items-table th, .items-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        .items-table th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+        .totals {
+            float: right;
+            width: 300px;
+        }
+        .totals table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .totals td {
+            padding: 5px;
+            border-bottom: 1px solid #ddd;
+        }
+        .totals .total-row {
+            font-weight: bold;
+            font-size: 16px;
+            border-top: 2px solid #333;
+        }
+        .notes {
+            margin-top: 30px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-left: 4px solid #007bff;
+        }
+        @@media print {
+            body { margin: 0; }
+            .no-print { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="invoice-header">
+        <div class="invoice-title">INVOICE</div>
+        <div class="invoice-number">@Model.InvoiceNumber</div>
+    </div>
+
+    <div class="invoice-info">
+        <div class="customer-info">
+            <h3>Bill To:</h3>
+            <p><strong>@Model.CustomerName</strong></p>
+            @if (!string.IsNullOrEmpty(Model.CustomerAddress))
+            {
+                <p>@Model.CustomerAddress</p>
+            }
+            @if (!string.IsNullOrEmpty(Model.CustomerPhone))
+            {
+                <p>Phone: @Model.CustomerPhone</p>
+            }
+        </div>
+        <div class="invoice-details">
+            <h3>Invoice Details:</h3>
+            <p><strong>Invoice Date:</strong> @Model.InvoiceDate.ToString("MMMM dd, yyyy")</p>
+            <p><strong>Due Date:</strong> @Model.DueDate.ToString("MMMM dd, yyyy")</p>
+            <p><strong>Payment Status:</strong> @Model.PaymentStatus</p>
+            @if (!string.IsNullOrEmpty(Model.PaymentMethod))
+            {
+                <p><strong>Payment Method:</strong> @Model.PaymentMethod</p>
+            }
+        </div>
+    </div>
+
+    <table class="items-table">
+        <thead>
+            <tr>
+                <th>Item</th>
+                <th>Quantity</th>
+                <th>Unit Price</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var detail in Model.Sales.SalesDetails)
+            {
+                <tr>
+                    <td>@detail.Product.ProductName</td>
+                    <td>@detail.Quantity</td>
+                    <td>$@detail.UnitPrice.ToString("F2")</td>
+                    <td>$@detail.TotalPrice.ToString("F2")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <div class="totals">
+        <table>
+            <tr>
+                <td>Subtotal:</td>
+                <td>$@Model.SubTotal.ToString("F2")</td>
+            </tr>
+            @if (Model.TaxAmount > 0)
+            {
+                <tr>
+                    <td>Tax:</td>
+                    <td>$@Model.TaxAmount.ToString("F2")</td>
+                </tr>
+            }
+            @if (Model.DiscountAmount > 0)
+            {
+                <tr>
+                    <td>Discount:</td>
+                    <td>-$@Model.DiscountAmount.ToString("F2")</td>
+                </tr>
+            }
+            <tr class="total-row">
+                <td>Total:</td>
+                <td>$@Model.TotalAmount.ToString("F2")</td>
+            </tr>
+        </table>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.Notes))
+    {
+        <div class="notes">
+            <h4>Notes:</h4>
+            <p>@Model.Notes</p>
+        </div>
+    }
+
+    <div class="no-print" style="margin-top: 30px; text-align: center;">
+        <button onclick="window.print()" style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
+            Print Invoice
+        </button>
+        <button onclick="window.close()" style="padding: 10px 20px; background: #6c757d; color: white; border: none; border-radius: 5px; cursor: pointer; margin-left: 10px;">
+            Close
+        </button>
+    </div>
+</body>
+</html> 

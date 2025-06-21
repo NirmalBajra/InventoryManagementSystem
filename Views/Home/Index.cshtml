@@ -2,9 +2,117 @@
     ViewData["Title"] = "Home Page";
 }
 
+<style>
+    .hero-section {
+        padding: 4rem 0;
+        background: #f8f9fa;
+    }
+
+    .hero-section h1 {
+        font-size: 3rem;
+        font-weight: 700;
+    }
+
+    .hero-section p {
+        font-size: 1.25rem;
+        color: #6c757d;
+    }
+
+    .hero-section img {
+        max-width: 100%;
+        height: auto;
+    }
+
+    .features-section {
+        padding: 4rem 0;
+    }
+
+    .feature-card {
+        border: none;
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        transition: transform 0.2s;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-10px);
+    }
+
+    .feature-icon {
+        font-size: 3rem;
+        color: #007bff;
+    }
+</style>
+
+
 <div class="container">
-    <div class="inner-class">
-        <h1 class="display-4">Welcome</h1>
-        <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    <div class="page-inner">
+        <!-- Hero Section -->
+        <div class="hero-section text-center">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-md-6 text-md-start">
+                        <h1>Welcome to Your Inventory Management System</h1>
+                        <p class="lead">
+                            A powerful and intuitive solution to streamline your stock, sales, and purchasing processes.
+                            Get real-time insights and take control of your inventory.
+                        </p>
+                        <a asp-controller="Auth" asp-action="Login" class="btn btn-primary btn-lg">Get Started</a>
+                    </div>
+                    <div class="col-md-6">
+                        <img src="~/Templates/img/undraw/undraw_Hello_qnas.svg" alt="Inventory Management" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Features Section -->
+        <div class="features-section">
+            <div class="container">
+                <div class="text-center mb-5">
+                    <h2>Key Features</h2>
+                    <p class="lead">Everything you need to manage your inventory efficiently.</p>
+                </div>
+                <div class="row">
+                    <div class="col-md-4 mb-4">
+                        <div class="card feature-card text-center p-4 h-100">
+                            <div class="card-body">
+                                <i class="fas fa-boxes feature-icon mb-3"></i>
+                                <h5 class="card-title">Stock Control</h5>
+                                <p class="card-text">Keep track of your products, manage stock levels, and get low-stock
+                                    alerts to prevent shortages.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="card feature-card text-center p-4 h-100">
+                            <div class="card-body">
+                                <i class="fas fa-chart-line feature-icon mb-3"></i>
+                                <h5 class="card-title">Sales & Invoicing</h5>
+                                <p class="card-text">Record sales transactions, generate invoices, and analyze your
+                                    sales performance with detailed reports.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="card feature-card text-center p-4 h-100">
+                            <div class="card-body">
+                                <i class="fas fa-truck-loading feature-icon mb-3"></i>
+                                <h5 class="card-title">Purchase Management</h5>
+                                <p class="card-text">Manage suppliers, record purchases, and track your incoming stock
+                                    to optimize your supply chain.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Call to Action Section -->
+        <div class="text-center p-4" style="background-color: #f8f9fa;">
+            <h2>Ready to take control?</h2>
+            <p>Log in or create an account to start managing your inventory like a pro.</p>
+            <a asp-controller="Auth" asp-action="Login" class="btn btn-secondary me-2">Login</a>
+            <a asp-controller="Auth" asp-action="Register" class="btn btn-outline-primary">Register</a>
+        </div>
     </div>
 </div>

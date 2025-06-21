@@ -1,5 +1,236 @@
 ﻿@*
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
+@model InventoryManagementSystem.ViewModels.Sales.SalesVm
+
 @{
+    ViewData["Title"] = "Edit Sale";
+    ViewData["PageTitle"] = "Edit Sale";
+    ViewData["MainItem"] = "Sales";
+    ViewData["SubItem"] = "Edit";
+    var productsJson = Json.Serialize(Model.Products);
+}
+
+<div class="container">
+    <div class="page-inner">
+        @await Html.PartialAsync("breadcurm")
+
+        <div class="card">
+            <div class="card-header">
+                <h3 class="mb-0">Edit Sale #@Model.SalesId</h3>
+            </div>
+
+            <div class="card-body">
+                <form asp-action="EditSales" asp-route-id="@Model.SalesId" method="post">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h4 class="card-title">Sale Details</h4>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label asp-for="CustomerName" class="form-label">Customer Name</label>
+                                            <input asp-for="CustomerName" class="form-control" />
+                                            <span asp-validation-for="CustomerName" class="text-danger"></span>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label asp-for="SalesDate" class="form-label">Sale Date</label>
+                                            <input asp-for="SalesDate" type="date" class="form-control" />
+                                            <span asp-validation-for="SalesDate" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                    <hr />
+                                    <h5>Products</h5>
+                                    <div id="productRows">
+                                        @if (Model.SalesDetails != null)
+                                        {
+                                            for (int i = 0; i < Model.SalesDetails.Count; i++)
+                                            {
+                                                var item = Model.SalesDetails[i];
+                                                <div class="row product-row mb-3" id="productRow_@i">
+                                                    <div class="col-md-4">
+                                                        <label class="form-label">Product</label>
+                                                        <select name="SalesDetails[@i].ProductId" class="form-control product-select" onchange="onProductChange(@i)" required>
+                                                            @foreach (var p in Model.Products)
+                                                            {
+                                                                <option value="@p.ProductId" data-price="@p.UnitPrice" data-stock="@p.AvailableQuantity" selected="@(p.ProductId == item.ProductId)">@p.ProductName</option>
+                                                            }
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <label class="form-label">Stock</label>
+                                                        <span class="available-stock" id="stock_@i"></span>
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <label class="form-label">Quantity</label>
+                                                        <input type="number" name="SalesDetails[@i].Quantity" class="form-control quantity-input" min="1" value="@item.Quantity" onchange="onQuantityChange(@i)" onkeyup="onQuantityChange(@i)" required />
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <label class="form-label">Price</label>
+                                                        <input type="number" name="SalesDetails[@i].UnitPrice" class="form-control price-input" min="0.01" step="0.01" value="@item.UnitPrice" onchange="onPriceChange(@i)" onkeyup="onPriceChange(@i)" required />
+                                                    </div>
+                                                    <div class="col-md-1">
+                                                        <label class="form-label">Total</label>
+                                                        <span class="row-total" id="total_@i"></span>
+                                                    </div>
+                                                    <div class="col-md-1 d-flex align-items-end">
+                                                        <button type="button" class="btn btn-danger btn-sm" onclick="removeProductRow(@i)">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            }
+                                        }
+                                    </div>
+                                    <button type="button" class="btn btn-primary" onclick="addProductRow()">Add Product</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h4 class="card-title">Summary</h4>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <label class="form-label">Total Items</label>
+                                            <div class="h4 text-primary" id="totalItems">0</div>
+                                        </div>
+                                        <div class="col-6 text-end">
+                                            <label class="form-label">Total Amount</label>
+                                            <div class="h4 text-success" id="totalAmount"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-footer text-end">
+                                    <button type="submit" class="btn btn-success">Update Sale</button>
+                                    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const products = @Html.Raw(productsJson);
+        let productRowIndex = @(Model.SalesDetails?.Count ?? 0);
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            updateAllRows();
+            updateGrandTotal();
+        });
+
+        function addProductRow() {
+            const container = document.getElementById('productRows');
+            const newRow = document.createElement('div');
+            newRow.className = 'row product-row mb-3';
+            newRow.id = `productRow_${productRowIndex}`;
+            
+            newRow.innerHTML = `
+                <div class="col-md-4">
+                    <label class="form-label">Product</label>
+                    <select name="SalesDetails[${productRowIndex}].ProductId" class="form-control product-select" onchange="onProductChange(${productRowIndex})" required>
+                        <option value="">Select Product</option>
+                        ${products.map(p => `<option value="${p.ProductId}" data-price="${p.UnitPrice}" data-stock="${p.AvailableQuantity}">${p.ProductName}</option>`).join('')}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Stock</label>
+                    <span class="available-stock" id="stock_${productRowIndex}">-</span>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Quantity</label>
+                    <input type="number" name="SalesDetails[${productRowIndex}].Quantity" class="form-control quantity-input" min="1" value="1" onchange="onQuantityChange(${productRowIndex})" onkeyup="onQuantityChange(${productRowIndex})" required />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Price</label>
+                    <input type="number" name="SalesDetails[${productRowIndex}].UnitPrice" class="form-control price-input" min="0.01" step="0.01" value="0" onchange="onPriceChange(${productRowIndex})" onkeyup="onPriceChange(${productRowIndex})" required />
+                </div>
+                <div class="col-md-1">
+                    <label class="form-label">Total</label>
+                    <span class="row-total" id="total_${productRowIndex}">0.00</span>
+                </div>
+                <div class="col-md-1 d-flex align-items-end">
+                    <button type="button" class="btn btn-danger btn-sm" onclick="removeProductRow(${productRowIndex})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `;
+            
+            container.appendChild(newRow);
+            productRowIndex++;
+        }
+        
+        function removeProductRow(index) {
+            const row = document.getElementById(`productRow_${index}`);
+            if (row) {
+                row.remove();
+                updateGrandTotal();
+            }
+        }
+
+        function onProductChange(index) {
+            const select = document.querySelector(`#productRow_${index} .product-select`);
+            const selectedOption = select.options[select.selectedIndex];
+            const priceInput = document.querySelector(`#productRow_${index} .price-input`);
+            const stockSpan = document.getElementById(`stock_${index}`);
+            
+            if (selectedOption.value) {
+                const price = selectedOption.getAttribute('data-price');
+                const stock = selectedOption.getAttribute('data-stock');
+                
+                priceInput.value = price;
+                stockSpan.textContent = stock;
+            } else {
+                priceInput.value = '0';
+                stockSpan.textContent = '-';
+            }
+            updateRowTotal(index);
+        }
+
+        function onQuantityChange(index) {
+            updateRowTotal(index);
+        }
+        
+        function onPriceChange(index) {
+            updateRowTotal(index);
+        }
+
+        function updateRowTotal(index) {
+            const row = document.getElementById(`productRow_${index}`);
+            const quantity = parseFloat(row.querySelector('.quantity-input').value) || 0;
+            const price = parseFloat(row.querySelector('.price-input').value) || 0;
+            const total = quantity * price;
+            row.querySelector('.row-total').textContent = total.toFixed(2);
+            updateGrandTotal();
+        }
+
+        function updateAllRows() {
+            const rows = document.querySelectorAll('.product-row');
+            rows.forEach((row, index) => {
+                updateRowTotal(index);
+            });
+        }
+
+        function updateGrandTotal() {
+            let grandTotal = 0;
+            let totalItems = 0;
+            document.querySelectorAll('.row-total').forEach(el => {
+                grandTotal += parseFloat(el.textContent) || 0;
+            });
+            document.querySelectorAll('.quantity-input').forEach(el => {
+                totalItems += parseInt(el.value) || 0;
+            });
+            document.getElementById('totalAmount').textContent = grandTotal.toFixed(2);
+            document.getElementById('totalItems').textContent = totalItems;
+        }
+    </script>
 }

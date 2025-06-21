@@ -4,6 +4,7 @@ using InventoryManagementSystem.Data;
 using InventoryManagementSystem.Dto;
 using InventoryManagementSystem.Dtos.PurchaseDtos;
 using InventoryManagementSystem.Entity;
+using InventoryManagementSystem.Helpers;
 using InventoryManagementSystem.Services.Interfaces;
 using InventoryManagementSystem.ViewModels.Purchase;
 using Microsoft.AspNetCore.Mvc;
@@ -107,12 +108,19 @@ public class PurchaseServices : IPurchaseService
 
     public async Task<Purchase> GetPurchaseByIdAsync(int id)
     {
-        return await dbContext.Purchases
+        var purchase = await dbContext.Purchases
         .Include(p => p.Supplier)
         .Include(p => p.PurchaseDetails)
             .ThenInclude(pd => pd.Product)
                 .ThenInclude(p => p.Category)
         .FirstOrDefaultAsync(p => p.PurchaseId == id);
+
+        if (purchase == null)
+        {
+            throw new UserFriendlyException($"Purchase with ID {id} not found.");
+        }
+
+        return purchase;
     }
 
     public async Task UpdatePurchaseAsync(int purchaseId, PurchaseDto dto)

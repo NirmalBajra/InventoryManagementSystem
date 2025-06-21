@@ -35,6 +35,59 @@
 
   <!-- CSS Just for demo purpose, don't include it in your project -->
   <link rel="stylesheet" href="~/Templates/css/demo.css" />
+  
+  <style>
+    /* Notification styles */
+    .notif-warning {
+      background-color: #ffc107;
+      color: #212529;
+    }
+    
+    .notif-danger {
+      background-color: #dc3545;
+      color: #fff;
+    }
+    
+    .notif-primary {
+      background-color: #007bff;
+      color: #fff;
+    }
+    
+    .notif-success {
+      background-color: #28a745;
+      color: #fff;
+    }
+    
+    .notif-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 10px;
+    }
+    
+    .notification {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      background-color: #dc3545;
+      color: white;
+      border-radius: 50%;
+      width: 18px;
+      height: 18px;
+      font-size: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+    }
+    
+    .nav-item.topbar-icon {
+      position: relative;
+    }
+  </style>
 </head>
 
 <body>
@@ -181,7 +234,7 @@
           <div class="collapse" id="maps">
             <ul class="nav nav-collapse">
               <li>
-                <a asp-controller="Sales" asp-action="ViewSales">
+                <a asp-controller="Sales" asp-action="Index">
                   <span class="sub-item">View Product Sales</span>
                 </a>
               </li>
@@ -268,16 +321,7 @@
       <!-- Navbar Header -->
       <nav class="navbar navbar-header navbar-header-transparent navbar-expand-lg border-bottom">
         <div class="container-fluid">
-          <nav class="navbar navbar-header-left navbar-expand-lg navbar-form nav-search p-0 d-none d-lg-flex">
-            <div class="input-group">
-              <div class="input-group-prepend">
-                <button type="submit" class="btn btn-search pe-1">
-                  <i class="fa fa-search search-icon"></i>
-                </button>
-              </div>
-              <input type="text" placeholder="Search ..." class="form-control" />
-            </div>
-          </nav>
+          
 
           <ul class="navbar-nav topbar-nav ms-md-auto align-items-center">
             <li class="nav-item topbar-icon dropdown hidden-caret d-flex d-lg-none">
@@ -293,201 +337,34 @@
                 </form>
               </ul>
             </li>
-            <li class="nav-item topbar-icon dropdown hidden-caret">
-              <a class="nav-link dropdown-toggle" href="#" id="messageDropdown" role="button" data-bs-toggle="dropdown"
-                aria-haspopup="true" aria-expanded="false">
-                <i class="fa fa-envelope"></i>
-              </a>
-              <ul class="dropdown-menu messages-notif-box animated fadeIn" aria-labelledby="messageDropdown">
-                <li>
-                  <div class="dropdown-title d-flex justify-content-between align-items-center">
-                    Messages
-                    <a href="#" class="small">Mark all as read</a>
-                  </div>
-                </li>
-                <li>
-                  <div class="message-notif-scroll scrollbar-outer">
-                    <div class="notif-center">
-                      <a href="#">
-                        <div class="notif-img">
-                          <img src="~/Templates/img/jm_denis.jpg" alt="Img Profile" />
-                        </div>
-                        <div class="notif-content">
-                          <span class="subject">Jimmy Denis</span>
-                          <span class="block"> How are you ? </span>
-                          <span class="time">5 minutes ago</span>
-                        </div>
-                      </a>
-                      <a href="#">
-                        <div class="notif-img">
-                          <img src="~/Templates/img/chadengle.jpg" alt="Img Profile" />
-                        </div>
-                        <div class="notif-content">
-                          <span class="subject">Chad</span>
-                          <span class="block"> Ok, Thanks ! </span>
-                          <span class="time">12 minutes ago</span>
-                        </div>
-                      </a>
-                      <a href="#">
-                        <div class="notif-img">
-                          <img src="~/Templates/img/mlane.jpg" alt="Img Profile" />
-                        </div>
-                        <div class="notif-content">
-                          <span class="subject">Jhon Doe</span>
-                          <span class="block">
-                            Ready for the meeting today...
-                          </span>
-                          <span class="time">12 minutes ago</span>
-                        </div>
-                      </a>
-                      <a href="#">
-                        <div class="notif-img">
-                          <img src="~/Templates/img/talha.jpg" alt="Img Profile" />
-                        </div>
-                        <div class="notif-content">
-                          <span class="subject">Talha</span>
-                          <span class="block"> Hi, Apa Kabar ? </span>
-                          <span class="time">17 minutes ago</span>
-                        </div>
-                      </a>
-                    </div>
-                  </div>
-                </li>
-                <li>
-                  <a class="see-all" href="javascript:void(0);">See all messages<i class="fa fa-angle-right"></i>
-                  </a>
-                </li>
-              </ul>
-            </li>
+            
             <li class="nav-item topbar-icon dropdown hidden-caret">
               <a class="nav-link dropdown-toggle" href="#" id="notifDropdown" role="button" data-bs-toggle="dropdown"
                 aria-haspopup="true" aria-expanded="false">
                 <i class="fa fa-bell"></i>
-                <span class="notification">4</span>
+                <span class="notification" id="notificationCount">0</span>
               </a>
               <ul class="dropdown-menu notif-box animated fadeIn" aria-labelledby="notifDropdown">
                 <li>
-                  <div class="dropdown-title">
-                    You have 4 new notification
+                  <div class="dropdown-title d-flex justify-content-between align-items-center">
+                    <span id="notificationTitle">You have 0 new notifications</span>
+                    <a href="#" class="small" onclick="markAllAsRead()">Mark all as read</a>
                   </div>
                 </li>
                 <li>
                   <div class="notif-scroll scrollbar-outer">
-                    <div class="notif-center">
-                      <a href="#">
-                        <div class="notif-icon notif-primary">
-                          <i class="fa fa-user-plus"></i>
-                        </div>
-                        <div class="notif-content">
-                          <span class="block"> New user registered </span>
-                          <span class="time">5 minutes ago</span>
-                        </div>
-                      </a>
-                      <a href="#">
-                        <div class="notif-icon notif-success">
-                          <i class="fa fa-comment"></i>
-                        </div>
-                        <div class="notif-content">
-                          <span class="block">
-                            Rahmad commented on Admin
-                          </span>
-                          <span class="time">12 minutes ago</span>
-                        </div>
-                      </a>
-                      <a href="#">
-                        <div class="notif-img">
-                          <img src="~/Templates/img/profile2.jpg" alt="Img Profile" />
-                        </div>
-                        <div class="notif-content">
-                          <span class="block">
-                            Reza send messages to you
-                          </span>
-                          <span class="time">12 minutes ago</span>
-                        </div>
-                      </a>
-                      <a href="#">
-                        <div class="notif-icon notif-danger">
-                          <i class="fa fa-heart"></i>
-                        </div>
-                        <div class="notif-content">
-                          <span class="block"> Farrah liked Admin </span>
-                          <span class="time">17 minutes ago</span>
-                        </div>
-                      </a>
+                    <div class="notif-center" id="notificationList">
+                      <div class="text-center p-3">
+                        <i class="fa fa-bell-slash text-muted" style="font-size: 2rem;"></i>
+                        <p class="text-muted mt-2">No new notifications</p>
+                      </div>
                     </div>
                   </div>
                 </li>
-                <li>
-                  <a class="see-all" href="javascript:void(0);">See all notifications<i class="fa fa-angle-right"></i>
-                  </a>
-                </li>
+                
               </ul>
             </li>
-            <li class="nav-item topbar-icon dropdown hidden-caret">
-              <a class="nav-link" data-bs-toggle="dropdown" href="#" aria-expanded="false">
-                <i class="fas fa-layer-group"></i>
-              </a>
-              <div class="dropdown-menu quick-actions animated fadeIn">
-                <div class="quick-actions-header">
-                  <span class="title mb-1">Quick Actions</span>
-                  <span class="subtitle op-7">Shortcuts</span>
-                </div>
-                <div class="quick-actions-scroll scrollbar-outer">
-                  <div class="quick-actions-items">
-                    <div class="row m-0">
-                      <a class="col-6 col-md-4 p-0" href="#">
-                        <div class="quick-actions-item">
-                          <div class="avatar-item bg-danger rounded-circle">
-                            <i class="far fa-calendar-alt"></i>
-                          </div>
-                          <span class="text">Calendar</span>
-                        </div>
-                      </a>
-                      <a class="col-6 col-md-4 p-0" href="#">
-                        <div class="quick-actions-item">
-                          <div class="avatar-item bg-warning rounded-circle">
-                            <i class="fas fa-map"></i>
-                          </div>
-                          <span class="text">Maps</span>
-                        </div>
-                      </a>
-                      <a class="col-6 col-md-4 p-0" href="#">
-                        <div class="quick-actions-item">
-                          <div class="avatar-item bg-info rounded-circle">
-                            <i class="fas fa-file-excel"></i>
-                          </div>
-                          <span class="text">Reports</span>
-                        </div>
-                      </a>
-                      <a class="col-6 col-md-4 p-0" href="#">
-                        <div class="quick-actions-item">
-                          <div class="avatar-item bg-success rounded-circle">
-                            <i class="fas fa-envelope"></i>
-                          </div>
-                          <span class="text">Emails</span>
-                        </div>
-                      </a>
-                      <a class="col-6 col-md-4 p-0" href="#">
-                        <div class="quick-actions-item">
-                          <div class="avatar-item bg-primary rounded-circle">
-                            <i class="fas fa-file-invoice-dollar"></i>
-                          </div>
-                          <span class="text">Invoice</span>
-                        </div>
-                      </a>
-                      <a class="col-6 col-md-4 p-0" href="#">
-                        <div class="quick-actions-item">
-                          <div class="avatar-item bg-secondary rounded-circle">
-                            <i class="fas fa-credit-card"></i>
-                          </div>
-                          <span class="text">Payments</span>
-                        </div>
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </li>
+            
 
             @if (User.Identity.IsAuthenticated)
             {
@@ -521,12 +398,6 @@
                     </li>
 
                     <li>
-                      <div class="dropdown-divider"></div>
-                      <a class="dropdown-item" href="#">My Profile</a>
-                      <a class="dropdown-item" href="#">My Balance</a>
-                      <a class="dropdown-item" href="#">Inbox</a>
-                      <div class="dropdown-divider"></div>
-                      <a class="dropdown-item" href="#">Account Setting</a>
                       <div class="dropdown-divider"></div>
                       <form method="post" action="/Account/Logout" onsubmit="return confirmLogout()">
                         <button class="dropdown-item" type="submit" asp-area="" asp-controller="Auth"
@@ -610,6 +481,138 @@
   <!-- jQuery Vector Maps -->
   <script src="~/Templates/js/plugin/jsvectormap/jsvectormap.min.js"></script>
   <script src="~/Templates/js/plugin/jsvectormap/world.js"></script>
+
+  <!-- Notification System JavaScript -->
+  <script>
+    // Function to fetch and update notification count
+    async function updateNotificationCount() {
+      try {
+        const response = await fetch('/StockAlert/GetUnreadCount');
+        const data = await response.json();
+        const count = data.count;
+        
+        const notificationCount = document.getElementById('notificationCount');
+        const notificationTitle = document.getElementById('notificationTitle');
+        
+        if (notificationCount) {
+          notificationCount.textContent = count;
+          notificationCount.style.display = count > 0 ? 'inline' : 'none';
+        }
+        
+        if (notificationTitle) {
+          notificationTitle.textContent = count === 1 ? 'You have 1 new notification' : `You have ${count} new notifications`;
+        }
+      } catch (error) {
+        console.error('Error fetching notification count:', error);
+      }
+    }
+
+    // Function to load notifications
+    async function loadNotifications() {
+      try {
+        const response = await fetch('/StockAlert/GetUnreadAlertsJson');
+        const alerts = await response.json();
+        const notificationList = document.getElementById('notificationList');
+        
+        if (alerts && alerts.length > 0) {
+          // Convert alerts to notification items
+          let notificationsHtml = '';
+          alerts.forEach(alert => {
+            notificationsHtml += `
+              <a href="/StockAlert/Index" onclick="markNotificationAsRead(${alert.id})">
+                <div class="notif-icon ${alert.iconColor}">
+                  <i class="fa ${alert.iconClass}"></i>
+                </div>
+                <div class="notif-content">
+                  <span class="block">${alert.productName}: ${alert.message}</span>
+                  <span class="time">${alert.createdAt}</span>
+                </div>
+              </a>
+            `;
+          });
+          notificationList.innerHTML = notificationsHtml;
+        } else {
+          // Show no notifications message
+          notificationList.innerHTML = `
+            <div class="text-center p-3">
+              <i class="fa fa-bell-slash text-muted" style="font-size: 2rem;"></i>
+              <p class="text-muted mt-2">No new notifications</p>
+            </div>
+          `;
+        }
+      } catch (error) {
+        console.error('Error loading notifications:', error);
+        const notificationList = document.getElementById('notificationList');
+        if (notificationList) {
+          notificationList.innerHTML = `
+            <div class="text-center p-3">
+              <i class="fa fa-exclamation-triangle text-warning" style="font-size: 2rem;"></i>
+              <p class="text-muted mt-2">Error loading notifications</p>
+            </div>
+          `;
+        }
+      }
+    }
+
+    // Function to mark a single notification as read
+    async function markNotificationAsRead(alertId) {
+      if (alertId > 0) {
+        try {
+          await fetch('/StockAlert/MarkAsRead', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `alertId=${alertId}`
+          });
+        } catch (error) {
+          console.error('Error marking notification as read:', error);
+        }
+      }
+    }
+
+    // Function to mark all notifications as read
+    async function markAllAsRead() {
+      try {
+        await fetch('/StockAlert/MarkAllAsRead', {
+          method: 'POST'
+        });
+        
+        // Update the UI
+        updateNotificationCount();
+        loadNotifications();
+        
+        // Show success message
+        $.notify({
+          message: 'All notifications marked as read'
+        }, {
+          type: 'success',
+          placement: {
+            from: 'top',
+            align: 'right'
+          }
+        });
+      } catch (error) {
+        console.error('Error marking all notifications as read:', error);
+      }
+    }
+
+    // Initialize notifications when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+      updateNotificationCount();
+      
+      // Load notifications when dropdown is opened
+      const notificationDropdown = document.getElementById('notifDropdown');
+      if (notificationDropdown) {
+        notificationDropdown.addEventListener('click', function() {
+          loadNotifications();
+        });
+      }
+    });
+
+    // Update notifications every 30 seconds
+    setInterval(updateNotificationCount, 30000);
+  </script>
 
   <script>
     $("#lineChart").sparkline([102, 109, 120, 99, 110, 105, 115], {
